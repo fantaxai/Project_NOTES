@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./notes_frontend/notes-vue-app
+    container_name: vue_frontend
+    ports:
+      - "3000:3000"          # порт из vue.config.js
+    volumes:
+      - ./notes_frontend/notes-vue-app:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  backend:
+    build: ./notes
+    container_name: django_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./notes:/app
+    environment:
+      - DEBUG=1
+
+  # База данных пока не нужна (SQLite), 
+  # но если перейдёшь на PostgreSQL — добавим позже
