@@ -1,0 +1,10 @@
+{
+  "vue.server.hybridMode": true,
+  "volar.codeLens.scriptSetupTools": false,
+  "volar.codeLens.references": false,
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false,
+  "vue.complete.casing.props": "auto",
+  "typescript.preferences.includePackageJsonAutoImports": "auto"
+}
