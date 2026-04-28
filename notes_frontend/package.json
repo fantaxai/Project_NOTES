@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "axios": "^1.15.0",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.4"
+  },
+  "name": "notes_frontend",
+  "version": "1.0.0",
+   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "main": "index.js",
+  "repository": "https://gitverse.ru/fantaxai/notes_frontend",
+  "author": "<gusevat2@edu.rea.ru>",
+  "license": "MIT",
+  
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.5",
+    "vite": "^8.0.7"
+  }
+}

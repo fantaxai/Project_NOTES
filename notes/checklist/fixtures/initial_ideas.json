@@ -1,0 +1,322 @@
+[
+  {
+    "model": "checklist.idea",
+    "pk": 1,
+    "fields": {
+      "text": "Прочитать книгу по саморазвитию",
+      "category": "self_development"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 2,
+    "fields": {
+      "text": "Начать вести дневник благодарности",
+      "category": "self_development"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 3,
+    "fields": {
+      "text": "Освоить новый навык за 30 дней",
+      "category": "self_development"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 4,
+    "fields": {
+      "text": "Медитировать 10 минут каждый день",
+      "category": "self_development"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 5,
+    "fields": {
+      "text": "Составить список целей на год",
+      "category": "self_development"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 6,
+    "fields": {
+      "text": "Пройти онлайн-курс по интересной теме",
+      "category": "study"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 7,
+    "fields": {
+      "text": "Выучить 100 новых слов на иностранном языке",
+      "category": "study"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 8,
+    "fields": {
+      "text": "Посмотреть документальный фильм",
+      "category": "study"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 9,
+    "fields": {
+      "text": "Прочитать научную статью",
+      "category": "study"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 10,
+    "fields": {
+      "text": "Посетить музей или выставку",
+      "category": "study"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 11,
+    "fields": {
+      "text": "Запланировать путешествие на выходные",
+      "category": "travel"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 12,
+    "fields": {
+      "text": "Посетить новое место в своем городе",
+      "category": "travel"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 13,
+    "fields": {
+      "text": "Составить список мест для будущих путешествий",
+      "category": "travel"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 14,
+    "fields": {
+      "text": "Попробовать блюдо другой кухни",
+      "category": "travel"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 15,
+    "fields": {
+      "text": "Сделать фотосессию в красивом месте",
+      "category": "travel"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 16,
+    "fields": {
+      "text": "Нарисовать картину или скетч",
+      "category": "art"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 17,
+    "fields": {
+      "text": "Написать рассказ или стихотворение",
+      "category": "art"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 18,
+    "fields": {
+      "text": "Послушать новый музыкальный альбом",
+      "category": "art"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 19,
+    "fields": {
+      "text": "Сходить в театр или на концерт",
+      "category": "art"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 20,
+    "fields": {
+      "text": "Сделать что-то своими руками",
+      "category": "art"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 21,
+    "fields": {
+      "text": "Позвонить старому другу",
+      "category": "friends"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 22,
+    "fields": {
+      "text": "Организовать встречу с друзьями",
+      "category": "friends"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 23,
+    "fields": {
+      "text": "Написать письмо близкому человеку",
+      "category": "friends"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 24,
+    "fields": {
+      "text": "Сделать комплимент незнакомцу",
+      "category": "friends"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 25,
+    "fields": {
+      "text": "Помочь кому-то без просьбы",
+      "category": "friends"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 26,
+    "fields": {
+      "text": "Провести вечер с семьей без гаджетов",
+      "category": "family"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 27,
+    "fields": {
+      "text": "Приготовить семейный ужин",
+      "category": "family"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 28,
+    "fields": {
+      "text": "Разобрать старые семейные фотографии",
+      "category": "family"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 29,
+    "fields": {
+      "text": "Позвонить родителям и поговорить подольше",
+      "category": "family"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 30,
+    "fields": {
+      "text": "Создать семейную традицию",
+      "category": "family"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 31,
+    "fields": {
+      "text": "Сделать утреннюю зарядку",
+      "category": "sport"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 32,
+    "fields": {
+      "text": "Пройти 10 000 шагов за день",
+      "category": "sport"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 33,
+    "fields": {
+      "text": "Попробовать новый вид физической активности",
+      "category": "sport"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 34,
+    "fields": {
+      "text": "Сделать растяжку перед сном",
+      "category": "sport"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 35,
+    "fields": {
+      "text": "Покататься на велосипеде",
+      "category": "sport"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 36,
+    "fields": {
+      "text": "Составить план на рабочую неделю",
+      "category": "work"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 37,
+    "fields": {
+      "text": "Разобрать рабочий стол и почту",
+      "category": "work"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 38,
+    "fields": {
+      "text": "Освоить новый инструмент для работы",
+      "category": "work"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 39,
+    "fields": {
+      "text": "Сделать задачу, которую давно откладывал",
+      "category": "work"
+    }
+  },
+  {
+    "model": "checklist.idea",
+    "pk": 40,
+    "fields": {
+      "text": "Обновить резюме или портфолио",
+      "category": "work"
+    }
+  }
+]
