@@ -4,8 +4,14 @@
 FROM node:22-alpine AS frontend-build
 
 WORKDIR /app
+
+# Настраиваем npm и добавляем DNS
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-timeout 120000 && \
+    npm config set fetch-retries 5
+
 COPY notes_frontend/notes-vue-app/package*.json ./
-RUN npm install
+RUN npm install --no-audit --no-fund
 COPY notes_frontend/notes-vue-app/ .
 RUN npm run build
 
@@ -21,7 +27,7 @@ COPY notes/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     pip install gunicorn
 
-# Копируем код Django
+# Копируем код Django (включая фикстуры)
 COPY notes/ /app/notes/
 
 # Копируем собранный фронтенд в статику
@@ -32,7 +38,7 @@ WORKDIR /app/notes
 # Собираем статику Django
 RUN python manage.py collectstatic --noinput
 
-# Копируем entrypoint скрипт ДО создания папок
+# Копируем entrypoint скрипт
 COPY entrypoint.sh /app/notes/entrypoint.sh
 RUN chmod +x /app/notes/entrypoint.sh
 

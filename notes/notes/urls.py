@@ -21,6 +21,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("", TemplateView.as_view(template_name="index.html")),
+    # Все остальные URL отдаем index.html для Vue Router
+    re_path(r'^.*$', TemplateView.as_view(template_name="index.html")),
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# В продакшене не используем static() - WhiteNoise сам обрабатывает
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
