@@ -24,6 +24,9 @@ class Note(models.Model):
     times_shown_as_idea = models.PositiveIntegerField(
         default=0, verbose_name="Количество показов как идея дня"
     )
+    
+    # НОВОЕ: Привязка к пользователю
+    user_id = models.CharField(max_length=36, db_index=True, verbose_name="ID пользователя", default='legacy')
 
     def __str__(self):
         return self.title
@@ -33,9 +36,12 @@ class IdeaOfTheDay(models.Model):
     note = models.ForeignKey("note.Note", on_delete=models.CASCADE, verbose_name="Заметка")
     date = models.DateField(auto_now_add=True, verbose_name="Дата показа")
     shown = models.BooleanField(default=True, verbose_name="Показана пользователю")
+    
+    # НОВОЕ: Привязка к пользователю
+    user_id = models.CharField(max_length=36, db_index=True, verbose_name="ID пользователя", default='legacy')
 
     class Meta:
-        unique_together = ["date", "note"]
+        unique_together = ["date", "note", "user_id"]  # Изменено: добавлен user_id
         verbose_name = "Идея дня"
         verbose_name_plural = "Идеи дня"
 

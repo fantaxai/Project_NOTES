@@ -32,6 +32,9 @@ class CheckList(models.Model):
         verbose_name="Сохранён как заметка",
         related_name="checklist_source",
     )
+    
+    # НОВОЕ: Привязка к пользователю
+    user_id = models.CharField(max_length=36, db_index=True, verbose_name="ID пользователя", default='legacy')
 
 
 class CheckListItem(models.Model):
@@ -43,7 +46,7 @@ class CheckListItem(models.Model):
         verbose_name="День месяца (1-31)", null=True, blank=True
     )
     completed = models.BooleanField(default=False, verbose_name="Выполнено")
-    order = models.PositiveIntegerField(default=0, verbose_name="Порядок")  # ← добавить эту строку
+    order = models.PositiveIntegerField(default=0, verbose_name="Порядок")
 
     class Meta:
         ordering = ["order"]

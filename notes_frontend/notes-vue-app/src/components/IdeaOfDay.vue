@@ -6,26 +6,26 @@
       <span>Загрузка идеи дня...</span>
     </div>
 
-    <!-- Ошибка -->
-    <div v-else-if="error" class="idea-error">
-      <span>😕 Не удалось загрузить идею дня</span>
-      <button class="retry-link" @click="retry">Повторить</button>
-    </div>
-
-    <!-- Недостаточно кандидатов -->
-    <div v-else-if="totalCandidates < 20" class="idea-empty">
+    <!-- Ошибка (нет кандидатов) -->
+    <div v-else-if="!loading && !currentIdea?.note" class="idea-empty">
       <div class="idea-badge">
         <span class="idea-icon">💡</span>
         <span class="idea-label">Идея дня</span>
       </div>
-      <p class="empty-message">
-        Недостаточно заметок для идеи дня. Нужно минимум 20 заметок-кандидатов. Сейчас:
-        {{ totalCandidates }}
-      </p>
+      <div class="empty-content">
+        <p class="empty-message">
+          {{ error || 'Модуль «Идея дня» работает от 20 заметок-кандидатов' }}
+        </p>
+        <p class="empty-hint">
+          Создайте заметки с отметкой 💡, чтобы увидеть здесь идею дня
+          <br>Сейчас кандидатов: {{ totalCandidates }}
+        </p>
+        <button v-if="error" @click="retry" class="retry-link">Повторить</button>
+      </div>
     </div>
 
-    <!-- Идея дня -->
-    <div v-else-if="currentIdea && currentIdea.note" class="idea-of-day" @click="goToIdea">
+    <!-- Идея дня (есть заметка) -->
+    <div v-else-if="currentIdea?.note" class="idea-of-day" @click="goToIdea">
       <div class="idea-badge">
         <span class="idea-icon">💡</span>
         <span class="idea-label">Идея дня</span>
@@ -50,9 +50,8 @@
             </span>
           </div>
 
-          <!-- Прогресс показа -->
           <div v-if="totalCandidates >= 20" class="idea-progress">
-            <span class="progress-text"> {{ shownCount }} / {{ totalCandidates }} </span>
+            <span class="progress-text">{{ shownCount }} / {{ totalCandidates }}</span>
             <div class="progress-bar">
               <div
                 class="progress-fill"
@@ -62,16 +61,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Все идеи показаны -->
-    <div v-else class="idea-empty">
-      <div class="idea-badge">
-        <span class="idea-icon">💡</span>
-        <span class="idea-label">Идея дня</span>
-      </div>
-      <p class="empty-message">Все идеи показаны</p>
-      <button class="reset-link" @click="resetAndRefresh">Начать заново</button>
     </div>
   </div>
 </template>
@@ -217,6 +206,11 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 20px;
+  min-height: 80px;
+}
+
+.empty-content {
+  flex: 1;
 }
 
 .idea-badge {
@@ -347,10 +341,17 @@ onMounted(async () => {
 }
 
 .empty-message {
-  flex: 1;
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #555;
+}
+
+.empty-hint {
   margin: 0;
-  color: #666;
-  font-size: 14px;
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
 }
 
 .reset-link {

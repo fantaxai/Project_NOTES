@@ -17,6 +17,11 @@ from .serializers import (
 )
 
 
+def get_user_id(request):
+    """Получает user_id из заголовка запроса"""
+    return request.headers.get('X-User-ID', 'unknown')
+
+
 class IdeaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Idea.objects.all()
     serializer_class = IdeaSerializer
@@ -33,12 +38,17 @@ class IdeaViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CheckListViewSet(viewsets.ModelViewSet):
-    queryset = CheckList.objects.all().order_by("-creation_date")
     serializer_class = CheckListSerializer
+    
+    def get_queryset(self):
+        """Фильтруем чек-листы по user_id"""
+        user_id = get_user_id(self.request)
+        return CheckList.objects.filter(user_id=user_id).order_by("-creation_date")
 
     @action(detail=False, methods=["post"])
     def generate(self, request):
         """Генерация нового чек-листа"""
+        user_id = get_user_id(request)
         serializer = CheckListGenerateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -54,18 +64,18 @@ class CheckListViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "Нет идей в выбранных категориях"}, status=status.HTTP_400_BAD_REQUEST
             )
-        actual_amount = min(
-            amount, ideas.count()
-        )  # если запрошено больше идей, чем есть — ограничиваем
+        actual_amount = min(amount, ideas.count())
         selected_ideas = random.sample(list(ideas), actual_amount)
 
         if categories and len(categories) > 1:
             selected_ideas = self._balance_by_category(selected_ideas, categories, actual_amount)
 
-        # создаём чек-лист
+        # создаём чек-лист с user_id
         with transaction.atomic():
             checklist = CheckList.objects.create(
-                amount_of_ideas=actual_amount, categories=categories
+                amount_of_ideas=actual_amount, 
+                categories=categories,
+                user_id=user_id  # Добавляем user_id
             )
             items = []
             for order, idea in enumerate(selected_ideas):
@@ -107,11 +117,12 @@ class CheckListViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def save_as_note(self, request, pk=None):
         """Сохранить чек-лист как заметку"""
+        user_id = get_user_id(request)
         checklist = self.get_object()
 
         if checklist.saved_as_note:
             return Response(
-                {"error": "Чек-лист уже сохранён как заметка"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Чек-лист уже сохранён как заметку"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         content_lines = []
@@ -122,6 +133,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
         note = Note.objects.create(
             title=f"Чек-лист от {checklist.creation_date.strftime('%d.%m.%Y')}",
             content="\n".join(content_lines),
+            user_id=user_id  # Добавляем user_id
         )
         checklist.saved_as_note = note
         checklist.save()

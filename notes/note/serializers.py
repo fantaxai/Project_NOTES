@@ -30,6 +30,7 @@ class NoteSerializer(serializers.ModelSerializer):
             "shown_as_idea",
             "shown_at",
             "times_shown_as_idea",
+            "user_id",
         ]
         read_only_fields = [
             "id",
@@ -37,6 +38,7 @@ class NoteSerializer(serializers.ModelSerializer):
             "last_change_date",
             "shown_at",
             "times_shown_as_idea",
+            "user_id",
         ]
 
 
@@ -74,18 +76,46 @@ class IdeaOfTheDaySerializer(serializers.ModelSerializer):
     )
     total_candidates = serializers.SerializerMethodField()
     shown_ids = serializers.SerializerMethodField()
+    shown_count = serializers.SerializerMethodField()
 
     class Meta:
         model = IdeaOfTheDay
-        fields = ["id", "note", "note_id", "date", "shown", "total_candidates", "shown_ids"]
-        read_only_fields = ["id", "date"]
+        fields = [
+            "id", "note", "note_id", "date", "shown", 
+            "total_candidates", "shown_ids", "shown_count", "user_id"
+        ]
+        read_only_fields = ["id", "date", "user_id"]
+
+    def get_user_id_from_obj(self, obj):
+        """Получает user_id из объекта"""
+        if hasattr(obj, 'user_id') and obj.user_id:
+            return obj.user_id
+        # Если obj - это словарь или нет user_id
+        return None
 
     def get_total_candidates(self, obj):
-        return Note.objects.filter(is_idea_candidate=True).count()
+        """Считаем кандидатов только для текущего пользователя"""
+        user_id = self.get_user_id_from_obj(obj)
+        if user_id:
+            return Note.objects.filter(is_idea_candidate=True, user_id=user_id).count()
+        return 0
 
     def get_shown_ids(self, obj):
-        return list(
-            Note.objects.filter(is_idea_candidate=True, shown_as_idea=True).values_list(
-                "id", flat=True
+        """Показанные заметки только для текущего пользователя"""
+        user_id = self.get_user_id_from_obj(obj)
+        if user_id:
+            return list(
+                Note.objects.filter(
+                    is_idea_candidate=True, shown_as_idea=True, user_id=user_id
+                ).values_list("id", flat=True)
             )
-        )
+        return []
+
+    def get_shown_count(self, obj):
+        """Количество показанных заметок"""
+        user_id = self.get_user_id_from_obj(obj)
+        if user_id:
+            return Note.objects.filter(
+                is_idea_candidate=True, shown_as_idea=True, user_id=user_id
+            ).count()
+        return 0

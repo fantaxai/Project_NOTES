@@ -1,11 +1,20 @@
-// stores/ideas.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { getUserId } from '../utils/session'
 
 const api = axios.create({
   baseURL: '/api/',
   headers: { 'Content-Type': 'application/json' },
+})
+
+// Добавляем user_id в каждый запрос
+api.interceptors.request.use(config => {
+  const userId = getUserId()
+  if (userId) {
+    config.headers['X-User-ID'] = userId
+  }
+  return config
 })
 
 export const useIdeaStore = defineStore('idea', () => {
@@ -22,25 +31,32 @@ export const useIdeaStore = defineStore('idea', () => {
     error.value = null
 
     try {
-      console.log('📡 Запрос к API...')
       const response = await api.get('/ideas/today/today/')
-      console.log('✅ Ответ:', response.data)
-
-      // ВАЖНО! Данные приходят в response.data
-      currentIdea.value = response.data
+      console.log('✅ Ответ API:', response.data)
+      
+      // Всегда сохраняем статистику
       totalCandidates.value = response.data.total_candidates || 0
-
+      
       if (response.data.shown_ids) {
         shownNoteIds.value = new Set(response.data.shown_ids)
       }
 
-      console.log('✅ currentIdea установлен:', currentIdea.value)
-      console.log('✅ totalCandidates установлен:', totalCandidates.value)
+      // Если нет заметки
+      if (!response.data.note) {
+        currentIdea.value = null
+        error.value = response.data.message || 'Недостаточно кандидатов'
+        return response.data
+      }
+
+      // Если есть заметка
+      currentIdea.value = response.data
+      error.value = null
 
       return response.data
     } catch (err) {
       console.error('❌ Ошибка:', err)
-      error.value = err.message || 'Ошибка загрузки'
+      error.value = err.response?.data?.error || err.message || 'Ошибка загрузки'
+      currentIdea.value = null
     } finally {
       loading.value = false
     }
@@ -65,13 +81,6 @@ export const useIdeaStore = defineStore('idea', () => {
     }
   }
 
-  const nextIdea = async () => {
-    if (currentIdea.value?.note?.id) {
-      await markAsShown(currentIdea.value.note.id)
-      await fetchIdeaOfDay()
-    }
-  }
-
   return {
     currentIdea,
     loading,
@@ -81,6 +90,5 @@ export const useIdeaStore = defineStore('idea', () => {
     fetchIdeaOfDay,
     markAsShown,
     resetShownStatus,
-    nextIdea,
   }
 })
