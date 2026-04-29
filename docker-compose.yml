@@ -8,3 +8,10 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=1
+    volumes:
+      - notes_data:/app/notes/data  # Сохраняем базу данных
+      - static_files:/app/notes/staticfiles  # Сохраняем статику
+
+volumes:
+  notes_data:
+  static_files:

@@ -32,16 +32,14 @@ WORKDIR /app/notes
 # Собираем статику Django
 RUN python manage.py collectstatic --noinput
 
-# СОЗДАЕМ ТАБЛИЦЫ В БАЗЕ ДАННЫХ
-RUN python manage.py migrate --noinput
+# Копируем entrypoint скрипт ДО создания папок
+COPY entrypoint.sh /app/notes/entrypoint.sh
+RUN chmod +x /app/notes/entrypoint.sh
 
-# Фиксим права на папку со статикой и создаём home для appuser
-RUN mkdir -p /home/appuser && \
-    chown -R 1000:1000 /home/appuser /app
-
-USER 1000
+# Создаем папки и настраиваем права
+RUN mkdir -p /app/notes/data /app/notes/staticfiles && \
+    chmod -R 777 /app/notes/data /app/notes/staticfiles
 
 EXPOSE 8000
 
-# Запуск через gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "notes.wsgi:application"]
+CMD ["/app/notes/entrypoint.sh"]
