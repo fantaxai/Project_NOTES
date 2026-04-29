@@ -2,16 +2,16 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  publicPath: '/static/',
   devServer: {
-    host: '0.0.0.0', // ⬅ОБЯЗАТЕЛЬНО для Docker
+    host: '0.0.0.0',
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://backend:8000', //  не 127.0.0.1, а имя сервиса
+        target: 'http://backend:8000',
         changeOrigin: true,
       },
     },
-    // Разрешаем доступ извне контейнера
     allowedHosts: 'all',
   },
   lintOnSave: false,
