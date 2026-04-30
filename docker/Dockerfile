@@ -1,28 +1,31 @@
+# Этап 1: Сборка фронтенда
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /frontend
+COPY notes_frontend/notes-vue-app/package*.json ./
+RUN npm install
+COPY notes_frontend/notes-vue-app/ .
+RUN npm run build
+
+# Этап 2: Финальный образ с бэкендом
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Копируем и устанавливаем зависимости Python
 COPY notes/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     pip install gunicorn
 
-# Копируем код Django
 COPY notes/ /app/notes/
-
-# Копируем УЖЕ СОБРАННЫЙ фронтенд (ты его собрала локально командой npm run build)
-COPY notes_frontend/notes-vue-app/dist /app/notes/static/frontend
+COPY --from=frontend-builder /frontend/dist /app/notes/static/frontend
 
 WORKDIR /app/notes
 
-# Собираем статику Django
 RUN python manage.py collectstatic --noinput
 
-# Копируем entrypoint скрипт
 COPY entrypoint.sh /app/notes/entrypoint.sh
 RUN chmod +x /app/notes/entrypoint.sh
 
-# Создаем папки и настраиваем права
 RUN mkdir -p /app/notes/data /app/notes/staticfiles && \
     chmod -R 777 /app/notes/data /app/notes/staticfiles
 
