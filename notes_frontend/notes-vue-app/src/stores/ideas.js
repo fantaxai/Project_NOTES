@@ -31,7 +31,7 @@ export const useIdeaStore = defineStore('idea', () => {
     error.value = null
 
     try {
-      const response = await api.get('/ideas/today/today/')
+      const response = await api.get('/ideas/today/')
       console.log('✅ Ответ API:', response.data)
       
       // Всегда сохраняем статистику

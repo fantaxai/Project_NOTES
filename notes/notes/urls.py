@@ -26,9 +26,9 @@ def create_session(request):
 
 
 router = DefaultRouter()
-router.register(r"notes", NoteViewSet, basename="note")  # Добавлен basename
-router.register(r"tags", TagViewSet, basename="tag")  # Лучше добавить везде для надёжности
-router.register(r"ideas/today", IdeaOfTheDayViewSet, basename="idea-of-the-day")
+router.register(r"notes", NoteViewSet, basename="note")
+router.register(r"tags", TagViewSet, basename="tag")
+router.register(r"ideas", IdeaOfTheDayViewSet, basename="idea-of-the-day")
 router.register(r"checklist/ideas", IdeaViewSet, basename="checklist-ideas")
 router.register(r"checklists", CheckListViewSet, basename="checklist")
 router.register(r"files", FileViewSet, basename="files")
@@ -37,9 +37,14 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/create-session/", create_session, name="create-session"),
-    path("", TemplateView.as_view(template_name="index.html")),
-    re_path(r'^.*$', TemplateView.as_view(template_name="index.html")),
 ]
 
+# Статические файлы в режиме DEBUG
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# ВАЖНО: Должен быть ПОСЛЕДНИМ — отдает index.html для всех SPA-маршрутов
+# Исключаем: api/, admin/, static/
+urlpatterns += [
+    re_path(r'^(?!api/|admin/|static/).*$', TemplateView.as_view(template_name="index.html")),
+]

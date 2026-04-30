@@ -9,7 +9,7 @@ services:
     environment:
       - DEBUG=1
     volumes:
-      - notes_data:/app/notes/data  # Сохраняем базу данных
+      - notes_data:/app/notes/data
       - static_files:/app/notes/staticfiles  # Сохраняем статику
 
 volumes:

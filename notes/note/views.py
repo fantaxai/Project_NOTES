@@ -16,8 +16,10 @@ from .serializers import (
 
 
 def get_user_id(request):
-    """Получает user_id из заголовка запроса"""
-    return request.headers.get('X-User-ID', 'unknown')
+    """Получает user_id из заголовка запроса, 
+    для локального использования всегда возвращает одного пользователя"""
+    # Для однопользовательского режима
+    return 'default_user'
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -89,25 +91,30 @@ class IdeaOfTheDayViewSet(viewsets.GenericViewSet):
         user_id = get_user_id(request)
         today = timezone.now().date()
 
-        # Проверяем, есть ли уже идея на сегодня для этого пользователя
         today_idea = IdeaOfTheDay.objects.filter(date=today, user_id=user_id).first()
 
         if today_idea:
             serializer = self.get_serializer(today_idea)
             return Response(serializer.data)
 
-        # Генерируем новую идею
-        candidates = Note.objects.filter(is_idea_candidate=True, user_id=user_id)
-        total = candidates.count()
+        total = Note.objects.filter(is_idea_candidate=True, user_id=user_id).count()
 
-        # Если меньше 20 заметок - идея дня не генерируется
         if total < 20:
-            return Response(
-                {"error": "Модуль «Идея дня» работает от 20 заметок-кандидатов"}, 
-                status=status.HTTP_400_BAD_REQUEST
+            shown_ids = list(
+                Note.objects.filter(
+                    is_idea_candidate=True, shown_as_idea=True, user_id=user_id
+                ).values_list("id", flat=True)
             )
+            return Response({
+                "note": None,
+                "total_candidates": total,
+                "shown_ids": shown_ids,
+                "shown_count": len(shown_ids),
+                "can_generate": False,
+                "message": f"Модуль «Идея дня» работает от 20 заметок-кандидатов. Сейчас: {total}"
+            })
 
-        # Алгоритм: показываем по кругу
+        candidates = Note.objects.filter(is_idea_candidate=True, user_id=user_id)
         unshown = candidates.filter(shown_as_idea=False)
 
         if unshown.exists():
@@ -116,13 +123,11 @@ class IdeaOfTheDayViewSet(viewsets.GenericViewSet):
             candidates.update(shown_as_idea=False, shown_at=None)
             idea_note = random.choice(list(candidates))
 
-        # Отмечаем как показанную
         idea_note.shown_as_idea = True
         idea_note.shown_at = timezone.now()
         idea_note.times_shown_as_idea += 1
         idea_note.save(update_fields=["shown_as_idea", "shown_at", "times_shown_as_idea"])
 
-        # Создаём запись в истории
         idea = IdeaOfTheDay.objects.create(note=idea_note, date=today, user_id=user_id)
 
         serializer = self.get_serializer(idea)

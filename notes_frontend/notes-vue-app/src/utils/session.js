@@ -2,17 +2,10 @@ import axios from 'axios';
 
 const USER_ID_KEY = 'notes_user_id';
 
-// Получаем или создаем user_id
+// utils/session.js
 export function getUserId() {
-    let userId = localStorage.getItem(USER_ID_KEY);
-    if (!userId) {
-        // Если нет - создаем временный
-        userId = generateTempId();
-        localStorage.setItem(USER_ID_KEY, userId);
-        // Асинхронно получаем постоянный ID
-        initUserId().catch(console.warn);
-    }
-    return userId;
+  // Фиксированный ID для однопользовательского режима
+  return 'default_user'
 }
 
 function generateTempId() {
