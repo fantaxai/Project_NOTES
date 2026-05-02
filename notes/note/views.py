@@ -16,9 +16,10 @@ from .serializers import (
 
 
 def get_user_id(request):
-    """Получает user_id из заголовка запроса"""
-    user_id = request.headers.get('X-User-ID', 'unknown')
-    return user_id
+    """Получает user_id из заголовка запроса, 
+    для локального использования всегда возвращает одного пользователя"""
+    # Для однопользовательского режима
+    return 'default_user'
 
 
 class TagViewSet(viewsets.ModelViewSet):
