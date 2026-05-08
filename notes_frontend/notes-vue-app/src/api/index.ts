@@ -7,6 +7,57 @@ const api: AxiosInstance = axios.create({
   },
 })
 
+// Добавляем перехватчик для токена
+api.interceptors.request.use((config: any) => {
+  const token = localStorage.getItem('access_token')
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+// Обрабатываем 401 ошибки
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+      
+      try {
+        const refreshToken = localStorage.getItem('refresh_token')
+        if (refreshToken) {
+          const response = await axios.post('/api/auth/token/refresh/', {
+            refresh: refreshToken
+          })
+          
+          const newAccess = response.data.access
+          localStorage.setItem('access_token', newAccess)
+          
+          // Обновляем токен в заголовке
+          originalRequest.headers = originalRequest.headers || {}
+          originalRequest.headers.Authorization = `Bearer ${newAccess}`
+          
+          // Обновляем также в глобальных настройках экземпляра
+          api.defaults.headers.common.Authorization = `Bearer ${newAccess}`
+          
+          return api(originalRequest)
+        }
+      } catch (refreshError) {
+        // Если рефреш не удался - очищаем всё
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        window.location.href = '/auth'
+        return Promise.reject(refreshError)
+      }
+    }
+    
+    return Promise.reject(error)
+  }
+)
+
 export interface Tag {
   id?: number
   name: string
@@ -17,7 +68,7 @@ export interface Note {
   id?: number
   title: string
   content: string
-  tags?: any[] // ← ТЕСТ
+  tags?: any[]
   created_at?: string
   updated_at?: string
   creation_date?: string
@@ -42,12 +93,6 @@ export const tagsApi = {
   getNotesByTag: (tagId: number): Promise<any> => api.get(`/tags/${tagId}/notes/`),
 }
 
-export default {
-  resolve: {
-    extensions: ['.ts', '.js', '.json'],
-  },
-}
-
 export const ideaApi = {
   getIdeaOfDay: (): Promise<any> => api.get('/ideas/today/today/'),
   markAsShown: (noteId: number): Promise<any> =>
@@ -55,6 +100,7 @@ export const ideaApi = {
   resetShownStatus: (): Promise<any> => api.post('/ideas/today/reset_shown/'),
   getStatistics: (): Promise<any> => api.get('/ideas/today/statistics/'),
 }
+
 export const checklistApi = {
   generate: (config: any): Promise<any> => api.post('/checklists/generate/', config),
   getAll: (): Promise<any> => api.get('/checklists/'),
@@ -66,3 +112,5 @@ export const checklistApi = {
   regenerate: (checklistId: number): Promise<any> =>
     api.post(`/checklists/${checklistId}/regenerate/`),
 }
+
+export default api

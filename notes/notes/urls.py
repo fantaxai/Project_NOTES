@@ -36,6 +36,7 @@ router.register(r"files", FileViewSet, basename="files")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    path("api/", include('apps.users.urls')), 
     path("api/create-session/", create_session, name="create-session"),
 ]
 

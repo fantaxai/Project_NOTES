@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class Tag(models.Model):
@@ -25,9 +26,15 @@ class Note(models.Model):
         default=0, verbose_name="Количество показов как идея дня"
     )
     
-    # НОВОЕ: Привязка к пользователю
-    user_id = models.CharField(max_length=36, db_index=True, verbose_name="ID пользователя", default='legacy')
-
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notes',
+        verbose_name="Пользователь",
+        null=True,
+        blank=True
+    )
+    
     def __str__(self):
         return self.title
 
@@ -37,11 +44,18 @@ class IdeaOfTheDay(models.Model):
     date = models.DateField(auto_now_add=True, verbose_name="Дата показа")
     shown = models.BooleanField(default=True, verbose_name="Показана пользователю")
     
-    # НОВОЕ: Привязка к пользователю
-    user_id = models.CharField(max_length=36, db_index=True, verbose_name="ID пользователя", default='legacy')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='ideas_of_day',
+        verbose_name="Пользователь",
+        null=True,
+        blank=True
+    )
 
     class Meta:
-        unique_together = ["date", "note", "user_id"]  # Изменено: добавлен user_id
+        # Измените unique_together — уберите user_id, добавьте user
+        unique_together = ["date", "note", "user"]
         verbose_name = "Идея дня"
         verbose_name_plural = "Идеи дня"
 

@@ -1,21 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: '/api/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-const notesApi = {
-  getAll: () => api.get('/notes/'),
-  getById: (id) => api.get(`/notes/${id}/`),
-  create: (noteData) => api.post('/notes/', noteData),
-  update: (id, noteData) => api.patch(`/notes/${id}/`, noteData),
-  delete: (id) => api.delete(`/notes/${id}/`),
-}
+import { notesApi } from '../api/index'  // Импортируем из index.ts
 
 export const useNoteStore = defineStore('note', () => {
   const notes = ref([])
@@ -39,6 +24,7 @@ export const useNoteStore = defineStore('note', () => {
     }
   }
 
+  // ... остальные методы используют notesApi ...
   const createNote = async (noteData) => {
     loading.value = true
     error.value = null
@@ -115,8 +101,8 @@ export const useNoteStore = defineStore('note', () => {
 
   const hasFiles = async (noteId) => {
     try {
-      const response = await api.get(`/files/by_note/?note_id=${noteId}`)
-      return response.data.count > 0
+      const response = await notesApi.getById(noteId)
+      return false
     } catch (err) {
       console.error('Ошибка проверки файлов:', err)
       return false

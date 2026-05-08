@@ -7,10 +7,16 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useAuthStore } from './stores/auth'
 import Navigation from './components/Navigation.vue'
 
-// При загрузке приложения проверяем тему
-onMounted(() => {
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  // Проверяем авторизацию
+  await authStore.checkAuth()
+  
+  // Устанавливаем тему
   const savedTheme = localStorage.getItem('theme')
   const root = document.documentElement
 

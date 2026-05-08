@@ -25,6 +25,17 @@
       </div>
 
       <div class="nav-right">
+        <!-- Информация о пользователе -->
+        <div class="user-info">
+          <div class="user-avatar">
+            {{ authStore.user?.username?.[0]?.toUpperCase() || '?' }}
+          </div>
+          <span class="user-name">{{ authStore.user?.username || 'Пользователь' }}</span>
+          <button class="logout-btn" title="Выйти" @click="handleLogout">
+            Выйти
+          </button>
+        </div>
+        
         <button class="settings-btn" title="Настройки" @click="openSettings">⚙️</button>
       </div>
     </div>
@@ -40,12 +51,16 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useNoteListStore } from '../stores/notelist'
+import { useAuthStore } from '../stores/auth'
 import SettingsModal from './SettingsModal.vue'
 import CheckList from './CheckList.vue'
 import { useChecklistStore } from '../stores/checklist'
 
+const router = useRouter()
 const noteListStore = useNoteListStore()
+const authStore = useAuthStore()
 const checklistStore = useChecklistStore()
 
 const showSettings = ref(false)
@@ -59,6 +74,11 @@ const openSettings = () => {
 
 const generateChecklist = () => {
   showCheckList.value = true
+}
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/auth')
 }
 
 const handleGenerateChecklist = async (config) => {
@@ -189,6 +209,58 @@ const handleGenerateChecklist = async (config) => {
   font-size: 16px;
 }
 
+/* Стили для информации о пользователе */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 30px;
+  margin-right: 4px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-color, #c9a9e8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  padding: 4px 12px;
+  background: none;
+  border: 1px solid var(--danger-color, #dc3545);
+  color: var(--danger-color, #dc3545);
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: var(--danger-bg, #fee);
+}
+
 .settings-btn {
   background: none;
   border: none;
@@ -226,6 +298,14 @@ const handleGenerateChecklist = async (config) => {
     flex: 1;
     justify-content: center;
     min-width: 100px;
+  }
+
+  .user-info {
+    padding: 4px 6px;
+  }
+
+  .user-name {
+    display: none;
   }
 }
 </style>

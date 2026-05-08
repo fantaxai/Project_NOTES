@@ -1,21 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
-import { getUserId } from '../utils/session'
-
-const api = axios.create({
-  baseURL: '/api/',
-  headers: { 'Content-Type': 'application/json' },
-})
-
-// Добавляем user_id в каждый запрос
-api.interceptors.request.use(config => {
-  const userId = getUserId()
-  if (userId) {
-    config.headers['X-User-ID'] = userId
-  }
-  return config
-})
+import api from '../api/index'  // Импортируем общий api
 
 export const useIdeaStore = defineStore('idea', () => {
   const currentIdea = ref(null)
@@ -34,21 +19,18 @@ export const useIdeaStore = defineStore('idea', () => {
       const response = await api.get('/ideas/today/')
       console.log('✅ Ответ API:', response.data)
       
-      // Всегда сохраняем статистику
       totalCandidates.value = response.data.total_candidates || 0
       
       if (response.data.shown_ids) {
         shownNoteIds.value = new Set(response.data.shown_ids)
       }
 
-      // Если нет заметки
       if (!response.data.note) {
         currentIdea.value = null
         error.value = response.data.message || 'Недостаточно кандидатов'
         return response.data
       }
 
-      // Если есть заметка
       currentIdea.value = response.data
       error.value = null
 
