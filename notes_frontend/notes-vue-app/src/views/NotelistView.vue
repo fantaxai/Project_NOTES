@@ -971,16 +971,27 @@ onBeforeUnmount(() => {
 /* Верхняя секция - две колонки одинаковой высоты */
 .top-section {
   display: flex;
-  gap: 20px;
-  margin: 20px 24px;
-  align-items: stretch;
+  gap: 16px;
+  margin: 16px 24px;
+  align-items: flex-start;
+} 
+
+@media (max-width: 768px) {
+  .top-section {
+    flex-direction: column;
+    margin: 16px;
+  }
+  
+  .right-column {
+    min-width: auto;
+  }
 }
 
 .left-column {
   flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -989,6 +1000,7 @@ onBeforeUnmount(() => {
   display: flex;
   min-width: 280px;
   overflow: hidden;
+  align-self: flex-start;
 }
 
 /* Идея дня */
@@ -1000,7 +1012,7 @@ onBeforeUnmount(() => {
 .tags-section-inline {
   background: var(--bg-primary, white);
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: 16px;
   box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.05));
   border: 1px solid var(--border-color, #e0e0e0);
   flex: 1;
@@ -1248,17 +1260,48 @@ onBeforeUnmount(() => {
   box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.05));
   border: 1px solid var(--border-color, #e0e0e0);
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .top-section {
+    flex-direction: column;
+    margin: 12px 16px;
+    gap: 12px;
+  }
+  
+  .left-column {
+    gap: 10px;
+  }
+  
+  .right-column {
+    min-width: auto;
+    align-self: stretch;
+  }
+  
+  .controls-panel {
+    flex-direction: column;
+    margin: 4px auto 16px auto;
+    padding: 0 20px;
+  }
+  
+  .notes-container {
+    padding: 0 20px 20px 20px;
+  }
+  
+  .search-wrapper {
+    max-width: 100%;
+  }
 }
 
 /* Панель управления (поиск и сортировка) */
 .controls-panel {
   max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px 32px;
+  margin: 8px auto 20px auto;
+  padding: 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -1407,7 +1450,7 @@ onBeforeUnmount(() => {
 .notes-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 32px 24px 32px;
 }
 
 .delete-error {
