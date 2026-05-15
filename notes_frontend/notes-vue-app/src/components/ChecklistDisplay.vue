@@ -355,6 +355,20 @@ onMounted(async () => {
   gap: 6px;
   min-height: 0;
   padding-right: 4px;
+  max-height: 200px;
+}
+/* На десктопе можно чуть больше */
+@media (min-width: 769px) {
+  .checklist-items {
+    max-height: 260px; /* ~4-5 пунктов на десктопе */
+  }
+}
+
+/* На мобильных - 3 пункта */
+@media (max-width: 768px) {
+  .checklist-items {
+    max-height: 150px; /* ~3 пункта */
+  }
 }
 
 .checklist-items::-webkit-scrollbar {
@@ -420,9 +434,32 @@ onMounted(async () => {
   border-radius: 10px;
 }
 
-.checklist-empty-list {
-  padding: 20px;
+.checklist-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 16px 12px; /* Уменьшаем с 20px до 16px 12px */
+  color: var(--text-secondary, #666);
+}
+
+.empty-icon {
+  font-size: 28px; /* Уменьшаем с 40px до 28px */
+  opacity: 0.5;
+  margin-bottom: 8px; /* Уменьшаем с 12px до 8px */
+}
+
+.empty-text {
+  font-size: 13px; /* Уменьшаем с 14px до 13px */
+  font-weight: 500;
+  margin: 0 0 4px 0; /* Уменьшаем нижний отступ */
+  color: var(--text-primary, #333);
+}
+
+.empty-hint {
+  font-size: 11px; /* Уменьшаем с 12px до 11px */
+  margin: 0;
   color: var(--text-tertiary, #999);
 }
 
@@ -676,5 +713,25 @@ onMounted(async () => {
   padding: 3px 12px;
   border-radius: 12px;
   font-weight: 500;
+}
+
+/* Мобильная адаптация для пустого чеклиста */
+@media (max-width: 768px) {
+  .checklist-empty {
+    padding: 12px 8px;
+  }
+  
+  .empty-icon {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  
+  .empty-text {
+    font-size: 12px;
+  }
+  
+  .empty-hint {
+    font-size: 10px;
+  }
 }
 </style>
