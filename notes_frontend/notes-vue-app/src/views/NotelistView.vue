@@ -1012,11 +1012,19 @@ onBeforeUnmount(() => {
 .tags-section-inline {
   background: var(--bg-primary, white);
   border-radius: 16px;
-  padding: 14px 16px; /* Уменьшаем с 16px до 14px */
+  padding: 16px;
   box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.05));
   border: 1px solid var(--border-color, #e0e0e0);
   flex: 1;
 }
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+  .tags-section-inline {
+    padding: 10px 12px;
+  }
+}
+
 
 .tags-section-header {
   display: flex;
@@ -1955,32 +1963,62 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
   .top-section {
     flex-direction: column;
-    margin: 16px;
+    margin: 8px 12px;
+    gap: 10px;
   }
-
+  
+  .left-column {
+    gap: 8px;
+  }
+  
   .right-column {
     min-width: auto;
+    align-self: stretch;
   }
-
+  
+  .checklist-preview {
+    padding: 12px;
+    max-height: 280px;
+  }
+  
   .controls-panel {
     flex-direction: column;
-    padding: 16px 20px;
+    margin: 4px auto 12px auto;
+    padding: 0 12px;
+    gap: 12px;
   }
-
+  
   .search-wrapper {
     max-width: 100%;
   }
-
+  
   .notes-container {
-    padding: 0 20px;
+    padding: 0 12px 16px 12px;
   }
-
+  
   .notes-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
-
+  
   .all-tags-grid {
     grid-template-columns: 1fr;
+  }
+  
+  /* Уменьшаем отступы в блоке тегов */
+  .tags-section-inline {
+    padding: 10px 12px;
+  }
+  
+  .popular-tag,
+  .selected-tag {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  
+  .tag-selector-inline {
+    margin-top: 8px;
+    padding-top: 8px;
   }
 }
 
