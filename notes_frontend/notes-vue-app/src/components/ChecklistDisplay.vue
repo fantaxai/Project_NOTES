@@ -1,14 +1,16 @@
 <template>
-  <div class="checklist-display checklist-root">
+  <div class="checklist-display" :class="{ 'has-items': hasItems, 'is-empty': !hasItems }">
     <div v-if="checklistStore.loading" class="checklist-loading">
       <div class="spinner-small"></div>
       <span>Загрузка...</span>
     </div>
 
     <div v-else-if="!checklistStore.currentChecklist" class="checklist-empty">
-      <span class="empty-icon">📝</span>
-      <p class="empty-text">Здесь будет ваш чеклист</p>
-      <p class="empty-hint">Нажмите "Чеклист" в меню, чтобы сгенерировать</p>
+      <div class="empty-content-wrapper">
+        <span class="empty-icon">📋</span>
+        <p class="empty-title">Чеклист</p>
+        <p class="empty-hint">Нажмите "Чеклист" в меню, чтобы сгенерировать</p>
+      </div>
     </div>
 
     <div v-else class="checklist-content">
@@ -34,21 +36,23 @@
           >
         </div>
       </div>
-      <div v-if="checklistStore.currentChecklist.items?.length" class="checklist-items">
-        <div
-          v-for="item in checklistStore.currentChecklist.items"
-          :key="item.id"
-          class="checklist-item"
-          :class="{ completed: item.completed }"
-          @click="toggleItem(item)"
-        >
-          <div class="item-checkbox">
-            <span v-if="item.completed" class="checkbox-done">☑</span>
-            <span v-else class="checkbox-todo">☐</span>
-          </div>
-          <div class="item-content">
-            <p class="item-text">{{ item.idea_text }}</p>
-            <span class="item-category">{{ item.category_display }}</span>
+      <div v-if="checklistStore.currentChecklist.items?.length" class="checklist-items-wrapper">
+        <div class="checklist-items">
+          <div
+            v-for="item in checklistStore.currentChecklist.items"
+            :key="item.id"
+            class="checklist-item"
+            :class="{ completed: item.completed }"
+            @click="toggleItem(item)"
+          >
+            <div class="item-checkbox">
+              <span v-if="item.completed" class="checkbox-done">☑</span>
+              <span v-else class="checkbox-todo">☐</span>
+            </div>
+            <div class="item-content">
+              <p class="item-text">{{ item.idea_text }}</p>
+              <span class="item-category">{{ item.category_display }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -148,7 +152,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useChecklistStore } from '../stores/checklist'
 
 const checklistStore = useChecklistStore()
@@ -156,6 +160,10 @@ const showListModal = ref(false)
 const showPreviewModal = ref(false)
 const previewChecklistData = ref(null)
 const checklistsLoading = ref(false)
+
+const hasItems = computed(() => {
+  return checklistStore.currentChecklist?.items?.length > 0
+})
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
@@ -216,6 +224,12 @@ onMounted(async () => {
   min-height: 0;
 }
 
+/* Пустое состояние - минимальная высота */
+.checklist-display.is-empty {
+  min-height: auto;
+  height: auto;
+}
+
 .checklist-loading {
   display: flex;
   align-items: center;
@@ -243,42 +257,50 @@ onMounted(async () => {
   }
 }
 
+/* Пустой чеклист - компактный */
 .checklist-empty {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 20px;
+  padding: 16px 12px;
   color: var(--text-secondary, #666);
 }
 
-.empty-icon {
-  font-size: 40px;
-  opacity: 0.5;
-  margin-bottom: 12px;
+.empty-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-.empty-text {
+.empty-icon {
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  margin: 0;
   font-size: 14px;
-  font-weight: 500;
-  margin: 0 0 6px 0;
+  font-weight: 600;
   color: var(--text-primary, #333);
 }
 
 .empty-hint {
-  font-size: 12px;
   margin: 0;
+  font-size: 11px;
   color: var(--text-tertiary, #999);
 }
 
+/* Чеклист с содержимым */
 .checklist-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  height: 100%;
 }
 
 .checklist-header {
@@ -347,27 +369,42 @@ onMounted(async () => {
   color: var(--text-tertiary, #999);
 }
 
-.checklist-items {
+/* Обертка для прокрутки пунктов */
+.checklist-items-wrapper {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+.checklist-items {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 0;
   padding-right: 4px;
 }
 
-.checklist-items::-webkit-scrollbar {
+/* Кастомизация скроллбара */
+.checklist-items-wrapper::-webkit-scrollbar {
   width: 5px;
 }
 
-.checklist-items::-webkit-scrollbar-track {
+.checklist-items-wrapper::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.checklist-items::-webkit-scrollbar-thumb {
+.checklist-items-wrapper::-webkit-scrollbar-thumb {
   background: var(--primary-color, #c9a9e8);
   border-radius: 3px;
+}
+
+.checklist-items-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover, #b794d4);
+}
+
+.checklist-items-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color, #c9a9e8) transparent;
 }
 
 .checklist-item {
@@ -461,7 +498,6 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-/* Фиксированная шапка */
 .modal-header-fixed {
   flex-shrink: 0;
   padding-bottom: 16px;
@@ -471,7 +507,6 @@ onMounted(async () => {
   z-index: 1;
 }
 
-/* Прокручиваемое тело */
 .modal-body-scroll {
   flex: 1;
   overflow-y: auto;
@@ -539,7 +574,6 @@ onMounted(async () => {
   color: var(--text-tertiary, #999);
 }
 
-/* Список чеклистов */
 .checklist-list {
   display: flex;
   flex-direction: column;
@@ -613,14 +647,11 @@ onMounted(async () => {
   background: var(--danger-bg, #fee);
 }
 
-/* Просмотр чеклиста */
 .preview-items {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-bottom: 8px;
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 .preview-item {
@@ -676,5 +707,36 @@ onMounted(async () => {
   padding: 3px 12px;
   border-radius: 12px;
   font-weight: 500;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .checklist-empty {
+    padding: 12px 8px;
+  }
+  
+  .empty-icon {
+    font-size: 24px;
+  }
+  
+  .empty-title {
+    font-size: 13px;
+  }
+  
+  .empty-hint {
+    font-size: 10px;
+  }
+  
+  .modal-list {
+    width: 90%;
+    max-width: 400px;
+    margin: 0 16px;
+  }
+  
+  .modal-preview {
+    width: 95%;
+    max-width: 500px;
+    margin: 0 16px;
+  }
 }
 </style>
