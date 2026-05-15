@@ -158,8 +158,24 @@ const getFileIcon = (format) => {
 }
 
 const downloadFile = (file) => {
-  // Здесь должна быть логика скачивания файла
-  console.log('Скачать файл:', file.name)
+  const url = fileStore.getFileUrl(file.id)
+  // Для изображений и PDF открываем в новой вкладке
+  if (['jpg', 'jpeg', 'png', 'pdf'].includes(file.format)) {
+    window.open(url, '_blank')
+  } else {
+    // Для остальных - скачивание
+    const link = document.createElement('a')
+    link.href = url
+    link.download = file.name
+    link.click()
+  }
+}
+
+const getImageUrl = (file) => {
+  if (file.thumbnail) {
+    return file.thumbnail
+  }
+  return fileStore.getFileUrl(file.id)
 }
 
 // Экспортируем метод для родительского компонента
@@ -191,13 +207,19 @@ defineExpose({
       <div v-for="file in files" :key="file.id" class="file-item" @click="downloadFile(file)">
         <div class="file-preview">
           <img
-            v-if="file.thumbnail && ['jpg', 'jpeg'].includes(file.format)"
+            v-if="['jpg', 'jpeg'].includes(file.format) && file.thumbnail"
             :src="file.thumbnail"
             :alt="file.name"
             class="file-thumbnail"
           />
+          <img
+            v-else-if="['jpg', 'jpeg'].includes(file.format) && !file.thumbnail && file.file_url"
+            :src="file.file_url"
+            :alt="file.name"
+            class="file-thumbnail"
+          />
           <span v-else class="file-icon">{{ getFileIcon(file.format) }}</span>
-        </div>
+        </div>        
 
         <div class="file-info">
           <div class="file-name" :title="file.name">{{ file.name }}</div>
