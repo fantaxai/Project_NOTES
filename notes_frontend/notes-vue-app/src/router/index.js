@@ -36,6 +36,14 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+// ===== НАСТРОЙКА МЕТРИКИ ДЛЯ SPA =====
+router.afterEach((to) => {
+  if (typeof ym !== 'undefined') {
+    ym(109251310, 'hit', to.fullPath);
+  }
+})
+// =====================================
+
 
 // Защита маршрутов
 router.beforeEach(async (to, from, next) => {
