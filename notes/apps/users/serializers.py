@@ -4,22 +4,35 @@ from django.contrib.auth.password_validation import validate_password
 
 User = get_user_model()
 
+# serializers.py
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
     
     class Meta:
         model = User
         fields = ('email', 'username', 'password', 'password2')
     
+    def validate_password(self, value):
+        """Дополнительная валидация пароля"""
+        if len(value) < 8:
+            raise serializers.ValidationError("Пароль должен содержать минимум 8 символов")
+        return value
+    
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Пароли не совпадают"})
+            raise serializers.ValidationError({
+                "password": "Пароли не совпадают",
+                "password2": "Пароли не совпадают"
+            })
         return attrs
     
     def create(self, validated_data):
         validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
         return user
 
 class UserLoginSerializer(serializers.Serializer):

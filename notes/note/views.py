@@ -17,15 +17,18 @@ from .serializers import (
 
 
 class AllowAnyOrAuthenticated(BasePermission):
-    """Разрешает доступ всем, но авторизованные пользователи работают через JWT"""
     def has_permission(self, request, view):
         return True
 
-
 class TagViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = Tag.objects.all()
     serializer_class = TagSerializer
+
+    def get_queryset(self):
+        return Tag.objects.filter(user=self.request.user).order_by("-creation_date")
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=["get"])
     def notes(self, request, pk=None):
@@ -34,7 +37,6 @@ class TagViewSet(viewsets.ModelViewSet):
         notes = tag.note_set.filter(user=request.user).order_by("-creation_date")
         serializer = NoteSerializer(notes, many=True)
         return Response(serializer.data)
-
 
 class NoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -58,22 +60,23 @@ class NoteViewSet(viewsets.ModelViewSet):
         note = self.get_object()
         tag_id = request.data.get("tag_id")
         try:
-            tag = Tag.objects.get(id=tag_id)
+            tag = Tag.objects.get(id=tag_id, user=request.user)
             note.tags.add(tag)
             return Response({"status": "tag added"})
         except Tag.DoesNotExist:
-            return Response({"error": "Tag not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Tag not found or doesn't belong to user"}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=["post"])
     def remove_tag(self, request, pk=None):
         note = self.get_object()
         tag_id = request.data.get("tag_id")
         try:
-            tag = Tag.objects.get(id=tag_id)
+            tag = Tag.objects.get(id=tag_id, user=request.user)
             note.tags.remove(tag)
             return Response({"status": "tag removed"})
         except Tag.DoesNotExist:
-            return Response({"error": "Tag not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Tag not found or doesn't belong to user"}, 
+                          status=status.HTTP_404_NOT_FOUND)
 
 
 class IdeaOfTheDayViewSet(viewsets.GenericViewSet):

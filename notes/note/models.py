@@ -7,6 +7,15 @@ class Tag(models.Model):
     color = models.CharField(default="#7517CC", verbose_name="Цвет тега", max_length=7)
     creation_date = models.DateField(auto_now_add=True, verbose_name="Дата создания тега")
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='tag',
+        verbose_name="Пользователь",
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         return self.name
 
@@ -54,7 +63,6 @@ class IdeaOfTheDay(models.Model):
     )
 
     class Meta:
-        # Измените unique_together — уберите user_id, добавьте user
         unique_together = ["date", "note", "user"]
         verbose_name = "Идея дня"
         verbose_name_plural = "Идеи дня"

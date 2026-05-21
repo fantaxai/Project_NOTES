@@ -6,8 +6,8 @@ from .models import IdeaOfTheDay, Note, Tag
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ["id", "name", "color", "creation_date"]
-        read_only_fields = ["id", "created_at"]
+        fields = ["id", "name", "color", "creation_date", "user_id"]
+        read_only_fields = ["id", "creation_date", "user_id"]
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -53,6 +53,15 @@ class NoteCreateUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
         extra_kwargs = {"title": {"required": False}, "content": {"required": False}}
 
+    def validate_tag_ids(self, value):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            user_tags = Tag.objects.filter(user=request.user)
+            for tag in value:
+                if tag not in user_tags:
+                    raise serializers.ValidationError(f"Тег {tag.name} не принадлежит текущему пользователю")
+        return value
+
     def create(self, validated_data):
         tags = validated_data.pop("tags", [])
         note = Note.objects.create(**validated_data)
@@ -90,7 +99,6 @@ class IdeaOfTheDaySerializer(serializers.ModelSerializer):
         """Получает user_id из объекта"""
         if hasattr(obj, 'user_id') and obj.user_id:
             return obj.user_id
-        # Если obj - это словарь или нет user_id
         return None
 
     def get_total_candidates(self, obj):
