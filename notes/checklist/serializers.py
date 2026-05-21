@@ -26,7 +26,7 @@ class CheckListItemSerializer(serializers.ModelSerializer):
             "category_display",
             "date",
             "completed",
-            "order",
+            "order"
         ]
         read_only_fields = ["id", "idea", "idea_text", "category", "category_display"]
 
@@ -45,8 +45,9 @@ class CheckListSerializer(serializers.ModelSerializer):
             "categories_display",
             "saved_as_note",
             "items",
+            "user_id"
         ]
-        read_only_fields = ["id", "creation_date", "saved_as_note"]
+        read_only_fields = ["id", "creation_date", "saved_as_note", "user_id"]
 
     def get_categories_display(self, obj):
         return [Idea.Category(cat).label for cat in obj.categories]
