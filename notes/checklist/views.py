@@ -1,7 +1,6 @@
 import random
 
 from django.db import transaction
-from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -16,11 +15,6 @@ from .serializers import (
     CheckListSerializer,
     IdeaSerializer,
 )
-
-
-def get_user_id(request):
-    """Получает user_id из заголовка запроса"""
-    return request.headers.get('X-User-ID', 'unknown')
 
 
 class IdeaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -81,7 +75,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
             checklist = CheckList.objects.create(
                 amount_of_ideas=actual_amount, 
                 categories=categories,
-                user=request.user  # Привязываем к текущему пользователю
+                user=request.user
             )
             items = []
             for order, idea in enumerate(selected_ideas):
@@ -110,6 +104,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
                 balanced_ideas.extend(random.sample(category_ideas, count))
             else:
                 balanced_ideas.extend(category_ideas)
+                
         if len(balanced_ideas) < total_amount:
             remaining = total_amount - len(balanced_ideas)
             all_other_ideas = [i for i in ideas if i not in balanced_ideas]
@@ -117,6 +112,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
                 balanced_ideas.extend(
                     random.sample(all_other_ideas, min(remaining, len(all_other_ideas)))
                 )
+                
         random.shuffle(balanced_ideas)
         return balanced_ideas
 
@@ -125,20 +121,17 @@ class CheckListViewSet(viewsets.ModelViewSet):
         """Сохранить чек-лист как заметку"""
         checklist = self.get_object()
 
+        # Проверяем принадлежность пользователю
         if checklist.user != request.user:
             return Response(
                 {"error": "Доступ запрещен"}, 
                 status=status.HTTP_403_FORBIDDEN
             )
+
         if checklist.saved_as_note:
             return Response(
                 {"error": "Чек-лист уже сохранён как заметку"}, 
                 status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if checklist.saved_as_note:
-            return Response(
-                {"error": "Чек-лист уже сохранён как заметку"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         content_lines = []
@@ -146,10 +139,11 @@ class CheckListViewSet(viewsets.ModelViewSet):
             status_mark = "✅" if item.completed else "⬜"
             content_lines.append(f"{status_mark} {item.idea.text}")
 
+        # Исправлено: используем request.user, а не user_id
         note = Note.objects.create(
             title=f"Чек-лист от {checklist.creation_date.strftime('%d.%m.%Y')}",
             content="\n".join(content_lines),
-            user_id=user_id  # Добавляем user_id
+            user=request.user
         )
         checklist.saved_as_note = note
         checklist.save()
@@ -161,6 +155,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
         """Перегенерировать чек-лист"""
         checklist = self.get_object()
         
+        # Проверяем принадлежность пользователю
         if checklist.user != request.user:
             return Response(
                 {"error": "Доступ запрещен"}, 
@@ -171,6 +166,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
 
         amount = checklist.amount_of_ideas
         categories = checklist.categories
+        
         if categories:
             ideas = Idea.objects.filter(category__in=categories)
         else:
@@ -185,6 +181,9 @@ class CheckListViewSet(viewsets.ModelViewSet):
         actual_amount = min(amount, ideas.count())
         selected_ideas = random.sample(list(ideas), actual_amount)
 
+        if categories and len(categories) > 1:
+            selected_ideas = self._balance_by_category(selected_ideas, categories, actual_amount)
+
         items = []
         for order, idea in enumerate(selected_ideas):
             items.append(CheckListItem(checklist=checklist, idea=idea, order=order))
@@ -196,6 +195,8 @@ class CheckListViewSet(viewsets.ModelViewSet):
     def toggle_completed(self, request, pk=None):
         """Отметить/снять отметку выполнения пункта"""
         checklist = self.get_object()
+        
+        # Проверяем принадлежность пользователю
         if checklist.user != request.user:
             return Response(
                 {"error": "Доступ запрещен"}, 
@@ -203,10 +204,20 @@ class CheckListViewSet(viewsets.ModelViewSet):
             )
 
         item_id = request.data.get("item_id")
+        if not item_id:
+            return Response(
+                {"error": "item_id обязателен"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
         try:
-            item = CheckListItem.objects.get(id=item_id, checklist_id=pk)
+            item = CheckListItem.objects.get(id=item_id, checklist=checklist)
             item.completed = not item.completed
             item.save()
-            return Response({"completed": item.completed})
+            serializer = CheckListItemSerializer(item)
+            return Response(serializer.data)
         except CheckListItem.DoesNotExist:
-            return Response({"error": "Item not found"}, status=404)
+            return Response(
+                {"error": "Пункт не найден"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )

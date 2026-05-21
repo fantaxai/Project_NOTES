@@ -105,6 +105,7 @@ export const checklistApi = {
   generate: (config: any): Promise<any> => api.post('/checklists/generate/', config),
   getAll: (): Promise<any> => api.get('/checklists/'),
   getById: (id: number): Promise<any> => api.get(`/checklists/${id}/`),
+  delete: (id: number): Promise<any> => api.delete(`/checklists/${id}/`),
   toggleItem: (checklistId: number, itemId: number): Promise<any> =>
     api.post(`/checklists/${checklistId}/toggle_completed/`, { item_id: itemId }),
   saveAsNote: (checklistId: number): Promise<any> =>
