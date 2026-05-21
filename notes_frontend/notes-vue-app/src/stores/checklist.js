@@ -1,7 +1,7 @@
 // stores/checklist.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { checklistApi } from '../api/index'  // Импортируем из общего API
+import { checklistApi } from '../api/index'
 
 export const useChecklistStore = defineStore('checklist', () => {
   const savedChecklist = localStorage.getItem('currentChecklist')
@@ -9,6 +9,7 @@ export const useChecklistStore = defineStore('checklist', () => {
   const checklists = ref([])
   const loading = ref(false)
   const error = ref(null)
+  const isLoaded = ref(false) // Флаг загрузки данных
 
   // Загрузить все чеклисты
   const fetchChecklists = async () => {
@@ -17,15 +18,16 @@ export const useChecklistStore = defineStore('checklist', () => {
     try {
       const response = await checklistApi.getAll()
       checklists.value = response.data
+      isLoaded.value = true
 
-      // Если есть текущий чеклист, обновить его данные
+      // Если есть текущий чеклист в localStorage, обновить его данные
       if (currentChecklist.value) {
         const updated = response.data.find((c) => c.id === currentChecklist.value.id)
         if (updated) {
           currentChecklist.value = updated
           localStorage.setItem('currentChecklist', JSON.stringify(updated))
         } else {
-          // Текущий чеклист был удалён
+          // Текущий чеклист был удалён на другом устройстве
           clearChecklist()
         }
       }
@@ -78,12 +80,10 @@ export const useChecklistStore = defineStore('checklist', () => {
     try {
       await checklistApi.delete(checklistId)
 
-      // Если удалили текущий, сбросить
       if (currentChecklist.value?.id === checklistId) {
         clearChecklist()
       }
 
-      // Обновить список
       await fetchChecklists()
     } catch (err) {
       console.error('Ошибка удаления чеклиста:', err.response?.data || err.message)
@@ -123,7 +123,6 @@ export const useChecklistStore = defineStore('checklist', () => {
         localStorage.setItem('currentChecklist', JSON.stringify(response.data))
       }
       
-      // Обновляем список
       await fetchChecklists()
       
       return response.data
@@ -143,7 +142,6 @@ export const useChecklistStore = defineStore('checklist', () => {
     try {
       const response = await checklistApi.saveAsNote(checklistId)
       
-      // Обновляем текущий чеклист
       if (currentChecklist.value?.id === checklistId) {
         currentChecklist.value = {
           ...currentChecklist.value,
@@ -168,11 +166,19 @@ export const useChecklistStore = defineStore('checklist', () => {
     localStorage.removeItem('currentChecklist')
   }
 
+  // Инициализация - загрузка чеклистов при первом обращении
+  const init = async () => {
+    if (!isLoaded.value) {
+      await fetchChecklists()
+    }
+  }
+
   return {
     currentChecklist,
     checklists,
     loading,
     error,
+    isLoaded,
     fetchChecklists,
     generateChecklist,
     selectChecklist,
@@ -181,5 +187,6 @@ export const useChecklistStore = defineStore('checklist', () => {
     regenerateChecklist,
     saveAsNote,
     clearChecklist,
+    init,
   }
 })

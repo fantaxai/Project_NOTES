@@ -402,12 +402,14 @@ import { useTagStore } from '../stores/tags'
 import { useFileStore } from '../stores/files'
 import IdeaOfDay from '../components/IdeaOfDay.vue'
 import ChecklistDisplay from '../components/ChecklistDisplay.vue'
+import { useChecklistStore } from '../stores/checklist'
 
 const router = useRouter()
 const route = useRoute()
 const noteListStore = useNoteListStore()
 const tagStore = useTagStore()
 const fileStore = useFileStore()
+const checklistStore = useChecklistStore()
 
 // Состояние для файлов
 const notesWithFiles = ref(new Set())
@@ -948,6 +950,7 @@ const getPluralForm = (number, forms) => {
 onMounted(() => {
   initFromUrl()
   fetchNotes()
+  checklistStore.fetchChecklists()
   nextTick(() => {
     updateLeftColumnHeight()
     setupResizeObserver()
