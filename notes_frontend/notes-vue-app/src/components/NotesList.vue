@@ -84,15 +84,34 @@ const getPreview = (content) => {
   // Удаляем HTML теги
   const plainText = content.replace(/<[^>]*>/g, '')
   
-  // Удаляем множественные пробелы и переносы строк
-  const cleanText = plainText.replace(/\s+/g, ' ').trim()
+  // Разбиваем на строки
+  const lines = plainText.split(/\r?\n/)
   
-  // Обрезаем до 90 символов
-  if (cleanText.length > 90) {
-    return cleanText.substring(0, 90) + '...'
+  // Берём первые 3 строки
+  const firstThreeLines = lines.slice(0, 3)
+  
+  // Из каждой строки берём первые 30 символов
+  const truncatedLines = firstThreeLines.map(line => {
+    if (line.length > 30) {
+      return line.substring(0, 30)
+    }
+    return line
+  })
+  
+  // Склеиваем обратно с переносами строк
+  let result = truncatedLines.join('\n')
+  
+  // Если есть ещё строки после третьей, добавляем многоточие
+  if (lines.length > 3) {
+    result += '...'
   }
   
-  return cleanText
+  // Если результат пустой
+  if (!result.trim()) {
+    return 'Нет содержания'
+  }
+  
+  return result
 }
 
 // Обрезаем заголовок до 25 символов
@@ -696,16 +715,17 @@ const getTruncatedTitle = (title) => {
   align-items: flex-start;
   margin-bottom: 12px;
   gap: 8px;
-  flex-shrink: 0; /* Не сжимается */
+  flex-shrink: 0;
+  min-width: 0; /* Важно */
 }
 
 .card-title-wrapper {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   flex: 1;
   min-width: 0;
-  overflow: hidden; /* Скрываем переполнение */
+  overflow: hidden;
 }
 
 .note-title {
@@ -732,16 +752,12 @@ const getTruncatedTitle = (title) => {
   color: #666;
   line-height: 1.5;
   font-size: 14px;
-  /* Убираем flex: 1 */
-  flex-shrink: 0; /* Не сжимается */
+  flex-shrink: 0;
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  /* Ограничиваем до 3 строк */
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  max-height: 63px; /* 3 строки * 21px (14px * 1.5 line-height) */
+  white-space: pre-wrap;
+  max-height: none;
 }
 
 .delete-btn {
