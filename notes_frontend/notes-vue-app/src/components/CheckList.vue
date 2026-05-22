@@ -42,16 +42,20 @@
           <div class="mode-selector">
             <button :class="['mode-option', { active: mode === 'smart' }]" @click="mode = 'smart'">
               <span class="mode-icon">🧠</span>
-              <span class="mode-title">Умный подбор</span>
-              <span class="mode-desc">70% по интересам + 30% разнообразие</span>
+              <div class="mode-content">
+                <span class="mode-title">Умный подбор</span>
+                <span class="mode-desc">70% по интересам + 30% разнообразие</span>
+              </div>
             </button>
             <button
               :class="['mode-option', { active: mode === 'random' }]"
               @click="mode = 'random'"
             >
               <span class="mode-icon">🎲</span>
-              <span class="mode-title">Случайный</span>
-              <span class="mode-desc">Равномерная выборка из категорий</span>
+              <div class="mode-content">
+                <span class="mode-title">Случайный</span>
+                <span class="mode-desc">Равномерная выборка из категорий</span>
+              </div>
             </button>
           </div>
         </div>
@@ -220,14 +224,15 @@ onMounted(() => {
   justify-content: center;
   z-index: 2000;
   backdrop-filter: blur(4px);
+  padding: 16px;
 }
 
 .modal-content {
   background: var(--bg-primary, white);
   border-radius: 20px;
   padding: 24px;
-  min-width: 500px;
-  max-width: 600px;
+  width: 100%;
+  max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -237,12 +242,12 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .modal-header h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   color: var(--text-primary, #333);
 }
 
@@ -255,6 +260,7 @@ onMounted(() => {
   padding: 4px 8px;
   border-radius: 8px;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .close-btn:hover {
@@ -264,24 +270,25 @@ onMounted(() => {
 .modal-body {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .form-group label {
   font-weight: 600;
+  font-size: 14px;
   color: var(--text-primary, #333);
 }
 
 .amount-control {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .amount-slider {
@@ -291,54 +298,66 @@ onMounted(() => {
   background: var(--border-color, #e0e0e0);
   -webkit-appearance: none;
   appearance: none;
+  min-width: 0;
 }
 
 .amount-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--primary-color, #c9a9e8);
   cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .amount-value {
-  min-width: 40px;
+  min-width: 36px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 18px;
   color: var(--primary-color, #c9a9e8);
 }
 
 .categories-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .category-checkbox {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: var(--bg-tertiary, #f8f9fa);
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 14px;
 }
 
 .category-checkbox:hover {
   background: var(--hover-bg, #e9ecef);
 }
 
-.category-checkbox input {
+.category-checkbox input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--primary-color, #c9a9e8);
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.category-label {
+  flex: 1;
+  min-width: 0;
 }
 
 .select-all-btn {
-  margin-top: 8px;
+  margin-top: 6px;
   padding: 8px 16px;
   background: none;
   border: 1px solid var(--primary-color, #c9a9e8);
@@ -346,7 +365,9 @@ onMounted(() => {
   color: var(--primary-color, #c9a9e8);
   cursor: pointer;
   font-size: 13px;
+  font-weight: 500;
   transition: all 0.2s;
+  width: 100%;
 }
 
 .select-all-btn:hover {
@@ -356,20 +377,21 @@ onMounted(() => {
 .mode-selector {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .mode-option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  padding: 16px;
+  padding: 14px;
   background: var(--bg-tertiary, #f8f9fa);
   border: 2px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
+  width: 100%;
 }
 
 .mode-option:hover {
@@ -382,28 +404,40 @@ onMounted(() => {
 }
 
 .mode-icon {
-  font-size: 28px;
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.mode-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .mode-title {
   font-weight: 600;
+  font-size: 14px;
   color: var(--text-primary, #333);
 }
 
 .mode-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary, #666);
-  margin-left: auto;
+  line-height: 1.4;
 }
 
 .interests-info {
-  padding: 16px;
+  padding: 14px;
   background: linear-gradient(135deg, #f0e6ff 0%, #e8d5f5 100%);
   border-radius: 12px;
 }
 
 .interests-header {
   font-weight: 600;
+  font-size: 13px;
   margin-bottom: 10px;
   color: var(--primary-color, #5700b3);
 }
@@ -411,36 +445,38 @@ onMounted(() => {
 .interests-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .interest-tag {
-  padding: 6px 14px;
+  padding: 6px 12px;
   background: white;
-  border-radius: 20px;
-  font-size: 13px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--primary-color, #5700b3);
   border: 1px solid var(--primary-color, #c9a9e8);
+  white-space: nowrap;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--border-color, #e0e0e0);
 }
 
 .cancel-btn,
 .generate-btn {
-  padding: 10px 24px;
+  padding: 10px 20px;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .cancel-btn {
@@ -468,5 +504,93 @@ onMounted(() => {
 .generate-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+    padding: 20px 16px;
+    max-width: 100%;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .category-checkbox {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .mode-option {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .mode-icon {
+    font-size: 22px;
+  }
+
+  .mode-title {
+    font-size: 13px;
+  }
+
+  .mode-desc {
+    font-size: 11px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .cancel-btn,
+  .generate-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .interests-tags {
+    gap: 4px;
+  }
+
+  .interest-tag {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+  .modal-content {
+    padding: 16px 12px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .category-checkbox {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .amount-value {
+    font-size: 16px;
+    min-width: 30px;
+  }
 }
 </style>
