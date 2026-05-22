@@ -679,8 +679,8 @@ const getTruncatedTitle = (title) => {
   border: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  min-height: 180px;
-  max-height: 280px;
+  min-height: 200px;
+  max-height: 300px;
   overflow: hidden;
 }
 
@@ -696,6 +696,7 @@ const getTruncatedTitle = (title) => {
   align-items: flex-start;
   margin-bottom: 12px;
   gap: 8px;
+  flex-shrink: 0; /* Не сжимается */
 }
 
 .card-title-wrapper {
@@ -704,6 +705,7 @@ const getTruncatedTitle = (title) => {
   gap: 8px;
   flex: 1;
   min-width: 0;
+  overflow: hidden; /* Скрываем переполнение */
 }
 
 .note-title {
@@ -726,15 +728,20 @@ const getTruncatedTitle = (title) => {
 }
 
 .note-preview {
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   color: #666;
   line-height: 1.5;
   font-size: 14px;
-  flex: 1;
+  /* Убираем flex: 1 */
+  flex-shrink: 0; /* Не сжимается */
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  max-height: 72px;
+  /* Ограничиваем до 3 строк */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  max-height: 63px; /* 3 строки * 21px (14px * 1.5 line-height) */
 }
 
 .delete-btn {
@@ -747,27 +754,30 @@ const getTruncatedTitle = (title) => {
   opacity: 0.6;
   transition: all 0.2s;
   flex-shrink: 0;
+  color: #999;
 }
 
 .delete-btn:hover:not(:disabled) {
   opacity: 1;
   background: #fee;
+  color: #dc3545;
 }
 
 .note-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 12px 0;
-  max-height: 32px;
+  margin: 8px 0;
+  flex-shrink: 0; /* Не сжимается */
+  max-height: 28px;
   overflow: hidden;
 }
 
 .note-tag {
   background: white;
   border: 1.5px solid;
-  padding: 4px 10px;
-  border-radius: 16px;
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -785,8 +795,8 @@ const getTruncatedTitle = (title) => {
 .tag-more {
   background: #e0e0e0;
   color: #666;
-  padding: 4px 10px;
-  border-radius: 16px;
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 12px;
   white-space: nowrap;
 }
@@ -798,6 +808,7 @@ const getTruncatedTitle = (title) => {
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid #f0f0f0;
+  flex-shrink: 0; /* Не сжимается */
 }
 
 .note-date {
