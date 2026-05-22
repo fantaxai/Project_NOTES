@@ -118,8 +118,42 @@ const formatDate = (dateString) => {
 // Превью текста
 const getPreview = (content) => {
   if (!content) return 'Нет содержания'
+  
+  // Удаляем HTML теги
   const plainText = content.replace(/<[^>]*>/g, '')
-  return plainText.length > 120 ? plainText.substring(0, 120) + '...' : plainText
+  
+  // Разбиваем на строки
+  const lines = plainText.split('\n').filter(line => line.trim())
+  
+  // Берем первые 3 строки и обрезаем каждую до 30 символов
+  const previewLines = lines.slice(0, 3).map(line => {
+    const trimmed = line.trim()
+    return trimmed.length > 30 ? trimmed.substring(0, 30) + '...' : trimmed
+  })
+  
+  // Если есть еще строки, добавляем индикатор
+  if (lines.length > 3) {
+    previewLines.push('...')
+  }
+  
+  // Если все строки пустые после обработки
+  if (previewLines.length === 0) {
+    return plainText.length > 90 ? plainText.substring(0, 90) + '...' : plainText
+  }
+  
+  return previewLines.join('\n')
+}
+
+// Обрезаем заголовок до 25 символов
+const getTruncatedTitle = (title) => {
+  if (!title) return 'Без названия'
+  return title.length > 25 ? title.substring(0, 25) + '...' : title
+}
+
+const getFullPreview = (content) => {
+  if (!content) return ''
+  const plainText = content.replace(/<[^>]*>/g, '')
+  return plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText
 }
 </script>
 
@@ -717,6 +751,8 @@ const getPreview = (content) => {
   display: flex;
   flex-direction: column;
   min-height: 180px;
+  max-height: 300px;
+  overflow: hidden;
 }
 
 .note-card:hover {
@@ -725,11 +761,121 @@ const getPreview = (content) => {
   border-color: #007bff;
 }
 
-.card-header {
+.note-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12px;
+  gap: 8px;
+}
+
+.card-title-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+  min-width: 0; /* Важно для корректного сжатия flex элемента */
+}
+
+.note-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0; /* Важно для корректного сжатия */
+  word-wrap: break-word; /* Перенос длинных слов */
+  overflow-wrap: break-word;
+  white-space: nowrap; /* Заголовок в одну строку */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Многоточие в конце */
+}
+
+.attachment-icon {
+  font-size: 16px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.note-preview {
+  margin: 0 0 16px 0;
+  color: #666;
+  line-height: 1.5;
+  font-size: 14px;
+  flex: 1;
+  overflow: hidden;
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-height: 80px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0.6;
+  transition: all 0.2s;
+  flex-shrink: 0; /* Кнопка не сжимается */
+}
+
+.delete-btn:hover:not(:disabled) {
+  opacity: 1;
+  background: #fee;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+  max-height: 40px; /* Ограничиваем высоту тегов */
+  overflow: hidden;
+}
+
+.note-tag {
+  background: white;
+  border: 1.5px solid;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap; /* Теги не переносятся */
+  max-width: 100px; /* Ограничиваем ширину тега */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-tag:hover {
+  transform: scale(1.05);
+}
+
+.note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.note-date {
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.read-more {
+  font-size: 14px;
+  color: #007bff;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .card-title {
