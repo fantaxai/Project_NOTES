@@ -1,11 +1,9 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useNoteListStore } from '../stores/notelist'
-//import { useRouter } from 'vue-router'
 import { useFileStore } from '../stores/files'
 import IdeaOfDay from '../components/IdeaOfDay.vue'
 
-//const router = useRouter()
 const noteListStore = useNoteListStore()
 const fileStore = useFileStore()
 
@@ -21,42 +19,6 @@ const error = computed(() => noteListStore.error)
 const searchQuery = computed(() => noteListStore.searchQuery)
 const sortOrder = computed(() => noteListStore.sortOrder)
 const totalCount = computed(() => noteListStore.totalCount)
-/* lint сказал их убрать
-const filteredCount = computed(() => noteListStore.filteredCount)
-const handleCreateNote = () => {
-  router.push('/create')
-}
-const handleNoteClick = (noteId) => {
-  router.push(`/note/${noteId}`)
-}
-const handleDeleteNote = async (noteId) => {
-  if (!confirm('Вы уверены, что хотите удалить эту заметку?')) {
-    return
-  }
-
-  isDeleting.value = true
-  deleteError.value = null
-
-  try {
-    await noteListStore.deleteNoteAndUpdateList(noteId)
-    // Удаляем информацию о файлах для удаленной заметки
-    notesWithFiles.value.delete(noteId)
-  } catch (err) {
-    deleteError.value = 'Не удалось удалить заметку'
-    console.error('Ошибка удаления:', err)
-  } finally {
-    isDeleting.value = false
-  }
-}
-const handleSearch = (event) => {
-  noteListStore.setSearchQuery(event.target.value)
-}
-const handleSortChange = (order) => {
-  noteListStore.setSortOrder(order)
-}
-const handleRetry = async () => {
-  await noteListStore.fetchNotes()
-}*/
 
 // Проверка наличия файлов для всех заметок
 const checkFilesForNotes = async () => {
@@ -115,45 +77,31 @@ const formatDate = (dateString) => {
   })
 }
 
-// Превью текста
+// Превью текста - ограничиваем до 90 символов (3 строки по 30)
 const getPreview = (content) => {
   if (!content) return 'Нет содержания'
   
   // Удаляем HTML теги
   const plainText = content.replace(/<[^>]*>/g, '')
   
-  // Разбиваем на строки
-  const lines = plainText.split('\n').filter(line => line.trim())
+  // Удаляем множественные пробелы и переносы строк
+  const cleanText = plainText.replace(/\s+/g, ' ').trim()
   
-  // Берем первые 3 строки и обрезаем каждую до 30 символов
-  const previewLines = lines.slice(0, 3).map(line => {
-    const trimmed = line.trim()
-    return trimmed.length > 30 ? trimmed.substring(0, 30) + '...' : trimmed
-  })
-  
-  // Если есть еще строки, добавляем индикатор
-  if (lines.length > 3) {
-    previewLines.push('...')
+  // Обрезаем до 90 символов
+  if (cleanText.length > 90) {
+    return cleanText.substring(0, 90) + '...'
   }
   
-  // Если все строки пустые после обработки
-  if (previewLines.length === 0) {
-    return plainText.length > 90 ? plainText.substring(0, 90) + '...' : plainText
-  }
-  
-  return previewLines.join('\n')
+  return cleanText
 }
 
 // Обрезаем заголовок до 25 символов
 const getTruncatedTitle = (title) => {
   if (!title) return 'Без названия'
-  return title.length > 25 ? title.substring(0, 25) + '...' : title
-}
-
-const getFullPreview = (content) => {
-  if (!content) return ''
-  const plainText = content.replace(/<[^>]*>/g, '')
-  return plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText
+  if (title.length > 25) {
+    return title.substring(0, 25) + '...'
+  }
+  return title
 }
 </script>
 
@@ -253,7 +201,6 @@ const getFullPreview = (content) => {
         </div>
       </div>
 
-      <!-- Выбранные теги для фильтрации -->
       <div v-if="selectedTagIds.length > 0" class="selected-filter-tags">
         <div class="filter-tags-list">
           <button
@@ -274,7 +221,6 @@ const getFullPreview = (content) => {
       </div>
       <div v-else class="empty-filter-hint">Нажмите "Выбрать теги" чтобы отфильтровать идеи</div>
 
-      <!-- Выпадающий список всех тегов -->
       <div v-if="showTagSelector" class="tag-selector-dropdown">
         <div class="tag-selector-header">
           <input
@@ -398,7 +344,7 @@ const getFullPreview = (content) => {
         >
           <div class="note-header">
             <div class="card-title-wrapper">
-              <h3 class="note-title" v-html="highlightText(note.title || 'Без названия')"></h3>
+              <h3 class="note-title">{{ getTruncatedTitle(note.title) }}</h3>
               <span
                 v-if="notesWithFiles.has(note.id)"
                 class="attachment-icon"
@@ -417,7 +363,7 @@ const getFullPreview = (content) => {
             </button>
           </div>
 
-          <p class="note-preview" v-html="highlightText(getPreview(note.content))"></p>
+          <p class="note-preview">{{ getPreview(note.content) }}</p>
 
           <div v-if="note.tags && note.tags.length" class="note-tags">
             <button
@@ -431,7 +377,7 @@ const getFullPreview = (content) => {
               }"
               @click.stop="selectSingleTag(tag.id)"
             >
-              <span v-html="highlightText('#' + tag.name)"></span>
+              #{{ tag.name }}
             </button>
             <span v-if="note.tags.length > 3" class="tag-more"> +{{ note.tags.length - 3 }} </span>
           </div>
@@ -586,19 +532,6 @@ const getFullPreview = (content) => {
   font-size: 20px;
 }
 
-.card-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.attachment-icon {
-  font-size: 16px;
-  opacity: 0.6;
-  flex-shrink: 0;
-}
-
 /* Панель сортировки */
 .sort-panel {
   max-width: 1200px;
@@ -665,12 +598,8 @@ const getFullPreview = (content) => {
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .error-state {
@@ -751,7 +680,7 @@ const getFullPreview = (content) => {
   display: flex;
   flex-direction: column;
   min-height: 180px;
-  max-height: 300px;
+  max-height: 280px;
   overflow: hidden;
 }
 
@@ -774,7 +703,7 @@ const getFullPreview = (content) => {
   align-items: flex-start;
   gap: 8px;
   flex: 1;
-  min-width: 0; /* Важно для корректного сжатия flex элемента */
+  min-width: 0;
 }
 
 .note-title {
@@ -784,12 +713,10 @@ const getFullPreview = (content) => {
   color: #1a1a1a;
   line-height: 1.4;
   flex: 1;
-  min-width: 0; /* Важно для корректного сжатия */
-  word-wrap: break-word; /* Перенос длинных слов */
-  overflow-wrap: break-word;
-  white-space: nowrap; /* Заголовок в одну строку */
+  min-width: 0;
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Многоточие в конце */
+  text-overflow: ellipsis;
 }
 
 .attachment-icon {
@@ -805,10 +732,9 @@ const getFullPreview = (content) => {
   font-size: 14px;
   flex: 1;
   overflow: hidden;
-  white-space: pre-line;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  max-height: 80px;
+  max-height: 72px;
 }
 
 .delete-btn {
@@ -820,7 +746,7 @@ const getFullPreview = (content) => {
   border-radius: 6px;
   opacity: 0.6;
   transition: all 0.2s;
-  flex-shrink: 0; /* Кнопка не сжимается */
+  flex-shrink: 0;
 }
 
 .delete-btn:hover:not(:disabled) {
@@ -833,7 +759,7 @@ const getFullPreview = (content) => {
   flex-wrap: wrap;
   gap: 6px;
   margin: 12px 0;
-  max-height: 40px; /* Ограничиваем высоту тегов */
+  max-height: 32px;
   overflow: hidden;
 }
 
@@ -846,14 +772,23 @@ const getFullPreview = (content) => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap; /* Теги не переносятся */
-  max-width: 100px; /* Ограничиваем ширину тега */
+  white-space: nowrap;
+  max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .note-tag:hover {
   transform: scale(1.05);
+}
+
+.tag-more {
+  background: #e0e0e0;
+  color: #666;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .note-footer {
@@ -876,64 +811,6 @@ const getFullPreview = (content) => {
   color: #007bff;
   font-weight: 500;
   white-space: nowrap;
-}
-
-.card-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
-  color: #1a1a1a;
-  line-height: 1.4;
-  flex: 1;
-  padding-right: 8px;
-}
-
-.card-delete-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  opacity: 0.6;
-  transition: all 0.2s;
-}
-
-.card-delete-btn:hover:not(:disabled) {
-  opacity: 1;
-  background: #fee;
-}
-
-.card-preview {
-  margin: 0 0 16px 0;
-  color: #666;
-  line-height: 1.5;
-  font-size: 14px;
-  flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.card-date {
-  font-size: 12px;
-  color: #999;
-}
-
-.card-read-more {
-  font-size: 14px;
-  color: #007bff;
-  font-weight: 500;
 }
 
 /* Адаптивность */
