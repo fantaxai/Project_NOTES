@@ -13,34 +13,24 @@ export const useAuthStore = defineStore('auth', () => {
     return !!accessToken.value && !!user.value
   })
   
-  function setTokens(access, refresh) {
-    accessToken.value = access
-    refreshToken.value = refresh
-    localStorage.setItem('access_token', access)
-    if (refresh) {
-      localStorage.setItem('refresh_token', refresh)
-    }
-    
-    // Обновляем заголовок axios для всех последующих запросов
-    const api = require('../api/index').default
-    if (api && api.defaults) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${access}`
-    }
+ function setTokens(access, refresh) {
+  accessToken.value = access
+  refreshToken.value = refresh
+  localStorage.setItem('access_token', access)
+  if (refresh) {
+    localStorage.setItem('refresh_token', refresh)
   }
-  
-  function clearTokens() {
-    accessToken.value = null
-    refreshToken.value = null
-    user.value = null
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    
-    // Очищаем заголовок axios
-    const api = require('../api/index').default
-    if (api && api.defaults) {
-      delete api.defaults.headers.common['Authorization']
-    }
-  }
+  // Больше ничего не нужно — интерцептор читает из localStorage сам
+}
+
+function clearTokens() {
+  accessToken.value = null
+  refreshToken.value = null
+  user.value = null
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('refresh_token')
+  localStorage.removeItem('currentChecklist') // ← чистим чеклист при выходе
+}
   
   async function register(username, email, password, password2) {
     try {

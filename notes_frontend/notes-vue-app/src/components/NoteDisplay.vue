@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted, watch } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import FileManager from './FileManager.vue'
 import { useFileStore } from '../stores/files'
 
@@ -51,6 +51,11 @@ const loadFiles = async () => {
 
 onMounted(() => {
   loadFiles()
+  window.addEventListener('click', closeExportMenu)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', closeExportMenu)
 })
 
 watch(
@@ -71,18 +76,6 @@ const closeExportMenu = (e) => {
   }
 }
 
-// Добавляем слушатель для закрытия меню
-if (typeof window !== 'undefined') {
-  window.addEventListener('click', closeExportMenu)
-}
-
-// Не забываем удалить слушатель при уничтожении компонента
-import { onBeforeUnmount } from 'vue'
-onBeforeUnmount(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('click', closeExportMenu)
-  }
-})
 
 const quickColors = [
   '#FFB3B3',

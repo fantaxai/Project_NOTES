@@ -1,39 +1,27 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: '/api/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+import api from '../api/index'  // ← импортируем общий инстанс с JWT
 
 const filesApi = {
   getAll: () => api.get('/files/'),
   getById: (id) => api.get(`/files/${id}/`),
   getByNote: (noteId) => api.get(`/files/by_note/?note_id=${noteId}`),
-
   create: (fileData) => {
     const formData = new FormData()
     formData.append('name', fileData.name)
     formData.append('size', fileData.size)
     formData.append('format', fileData.format)
     formData.append('note', fileData.note)
-
     if (fileData.thumbnail) {
       formData.append('thumbnail', fileData.thumbnail)
     }
     return api.post('/files/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
-
   delete: (id) => api.delete(`/files/${id}/`),
-  updateThumbnail: (id, thumbnail) => api.post(`/files/${id}/update_thumbnail/`, { thumbnail }),
-  getStatistics: () => api.get('/files/statistics/'),
+  updateThumbnail: (id, thumbnail) =>
+    api.post(`/files/${id}/update_thumbnail/`, { thumbnail }),
 }
 
 export const useFileStore = defineStore('file', () => {

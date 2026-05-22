@@ -94,7 +94,7 @@ export const tagsApi = {
 }
 
 export const ideaApi = {
-  getIdeaOfDay: (): Promise<any> => api.get('/ideas/today/today/'),
+  getIdeaOfDay: (): Promise<any> => api.get('/ideas/today/'),
   markAsShown: (noteId: number): Promise<any> =>
     api.post('/ideas/today/mark_shown/', { note_id: noteId }),
   resetShownStatus: (): Promise<any> => api.post('/ideas/today/reset_shown/'),
