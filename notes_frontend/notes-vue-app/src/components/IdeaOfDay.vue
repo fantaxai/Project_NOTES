@@ -32,35 +32,27 @@
       </div>
 
       <div class="idea-content">
+      <div class="idea-title-row">
         <h3 class="idea-title">{{ currentIdea.note.title }}</h3>
-        <p class="idea-preview">{{ getPreview(currentIdea.note.content) }}</p>
+      </div>
+      <!-- idea-preview УДАЛИТЬ отсюда -->
 
-        <div class="idea-footer">
-          <div v-if="currentIdea.note.tags?.length" class="idea-tags">
-            <span
-              v-for="tag in currentIdea.note.tags.slice(0, 3)"
-              :key="tag.id"
-              class="idea-tag"
-              :style="{ backgroundColor: tag.color + '20', color: tag.color }"
-            >
-              #{{ tag.name }}
-            </span>
-            <span v-if="currentIdea.note.tags.length > 3" class="more-tags">
-              +{{ currentIdea.note.tags.length - 3 }}
-            </span>
-          </div>
-
-          <div v-if="totalCandidates >= 20" class="idea-progress">
-            <span class="progress-text">{{ shownCount }} / {{ totalCandidates }}</span>
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                :style="{ width: `${(shownCount / totalCandidates) * 100}%` }"
-              ></div>
-            </div>
-          </div>
+      <div class="idea-footer">
+        <div v-if="currentIdea.note.tags?.length" class="idea-tags">
+          <span
+            v-for="tag in currentIdea.note.tags.slice(0, 3)"
+            :key="tag.id"
+            class="idea-tag"
+            :style="{ backgroundColor: tag.color + '20', color: tag.color }"
+          >
+            #{{ tag.name }}
+          </span>
+          <span v-if="currentIdea.note.tags.length > 3" class="more-tags">
+            +{{ currentIdea.note.tags.length - 3 }}
+          </span>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -142,16 +134,14 @@ onMounted(async () => {
 .idea-of-day {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 16px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   color: white;
   cursor: pointer;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: center;   /* иконка и текст на одной оси */
+  gap: 10px;
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  position: relative;
-  overflow: hidden;
 }
 
 .idea-of-day::before {
@@ -192,26 +182,25 @@ onMounted(async () => {
 
 .idea-badge {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;   /* иконка + подпись в строку */
   align-items: center;
-  gap: 2px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 6px 10px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  backdrop-filter: blur(10px);
+  flex-shrink: 0;
 }
 
 .idea-icon {
-  font-size: 24px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  font-size: 20px;
 }
 
 .idea-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.9;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .idea-content {
@@ -220,8 +209,8 @@ onMounted(async () => {
 }
 
 .idea-title {
-  margin: 0 0 4px 0;
-  font-size: 16px;
+  margin: 0;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
   color: white;

@@ -372,18 +372,32 @@ onMounted(async () => {
 /* Обертка для прокрутки пунктов */
 .checklist-items-wrapper {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: auto;           /* вертикальный скролл списка */
   min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #c9a9e8 transparent;
 }
 
-.checklist-items {
+.checklist-items-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.checklist-items-wrapper::-webkit-scrollbar-thumb {
+  background: #c9a9e8;
+  border-radius: 2px;
+}
+
+/* Скролл в модалке со списком всех чеклистов */
+.checklist-list {
+  max-height: 50vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-right: 4px;
-  max-height: 200px;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #c9a9e8 transparent;
 }
+
 /* На десктопе можно чуть больше */
 @media (min-width: 769px) {
   .checklist-items {

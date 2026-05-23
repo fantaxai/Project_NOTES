@@ -3,9 +3,11 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useNoteListStore } from '../stores/notelist'
 import { useFileStore } from '../stores/files'
 import IdeaOfDay from '../components/IdeaOfDay.vue'
+import { useTagStore } from '../stores/tags' 
 
 const noteListStore = useNoteListStore()
 const fileStore = useFileStore()
+const tagStore = useTagStore()
 
 // Локальное состояние
 const isDeleting = ref(false)
@@ -32,6 +34,16 @@ const checkFilesForNotes = async () => {
     } catch (err) {
       console.error(`Ошибка проверки файлов для заметки ${note.id}:`, err)
     }
+  }
+}
+
+// После создания тега — обновляем список
+const handleCreateTag = async (tagData) => {
+  try {
+    await tagStore.createTag(tagData)
+    await tagStore.fetchTags()   // <-- ключевая строка, принудительное обновление
+  } catch (err) {
+    console.error('Ошибка создания тега:', err)
   }
 }
 
@@ -77,51 +89,20 @@ const formatDate = (dateString) => {
   })
 }
 
-// Превью текста - ограничиваем до 90 символов (3 строки по 30)
+// Обрезаем контент — первые 30 символов
 const getPreview = (content) => {
   if (!content) return 'Нет содержания'
-  
-  // Удаляем HTML теги
-  const plainText = content.replace(/<[^>]*>/g, '')
-  
-  // Разбиваем на строки
-  const lines = plainText.split(/\r?\n/)
-  
-  // Берём первые 3 строки
-  const firstThreeLines = lines.slice(0, 3)
-  
-  // Из каждой строки берём первые 30 символов
-  const truncatedLines = firstThreeLines.map(line => {
-    if (line.length > 30) {
-      return line.substring(0, 30)
-    }
-    return line
-  })
-  
-  // Склеиваем обратно с переносами строк
-  let result = truncatedLines.join('\n')
-  
-  // Если есть ещё строки после третьей, добавляем многоточие
-  if (lines.length > 3) {
-    result += '...'
-  }
-  
-  // Если результат пустой
-  if (!result.trim()) {
-    return 'Нет содержания'
-  }
-  
-  return result
+  const plainText = content.replace(/<[^>]*>/g, '').trim()
+  if (!plainText) return 'Нет содержания'
+  return plainText.length > 30 ? plainText.substring(0, 30) + '...' : plainText
 }
 
-// Обрезаем заголовок до 25 символов
+// Обрезаем заголовок — первые 20 символов
 const getTruncatedTitle = (title) => {
   if (!title) return 'Без названия'
-  if (title.length > 25) {
-    return title.substring(0, 25) + '...'
-  }
-  return title
+  return title.length > 20 ? title.substring(0, 20) + '...' : title
 }
+
 </script>
 
 <template>
@@ -319,34 +300,33 @@ const getTruncatedTitle = (title) => {
       <button class="retry-btn" @click="fetchNotes">Попробовать снова</button>
     </div>
 
-    <div v-else-if="filteredNotes.length === 0" class="empty-state">
-      <div class="empty-icon">{{ searchQuery ? '🔍' : '💭' }}</div>
-      <h2 class="empty-title">
-        {{
-          selectedTagIds.length > 0
-            ? 'Нет идей с выбранными тегами'
-            : searchQuery
-              ? 'Ничего не найдено'
-              : 'Нет идей'
-        }}
-      </h2>
-      <p class="empty-text">
-        {{
-          selectedTagIds.length > 0
-            ? 'Попробуйте выбрать другие теги'
-            : searchQuery
-              ? 'Попробуйте изменить поисковый запрос'
-              : 'Создайте свою первую идею'
-        }}
-      </p>
-      <router-link
-        v-if="!searchQuery && selectedTagIds.length === 0"
-        to="/create"
-        class="create-first-btn"
-      >
-        Создать идею
+    <div v-else-if="filteredNotes.length === 0 && !searchQuery" class="empty-state">
+      <div class="empty-icon">💭</div>
+      <h2 class="empty-title">Добро пожаловать!</h2>
+      <p class="empty-subtitle">У вас пока нет идей. Начните прямо сейчас:</p>
+
+      <div class="onboarding-steps">
+        <div class="onboarding-step">
+          <span class="step-num">1</span>
+          <router-link to="/create" class="step-link">
+            Создайте первую идею →
+          </router-link>
+        </div>
+        <div class="onboarding-step">
+          <span class="step-num">2</span>
+          <span class="step-text">Отметьте 💡 "Кандидат идеи дня"</span>
+        </div>
+        <div class="onboarding-step">
+          <span class="step-num">3</span>
+          <span class="step-text">Создайте теги для организации</span>
+        </div>
+      </div>
+
+      <router-link to="/create" class="create-first-btn">
+        + Создать первую идею
       </router-link>
     </div>
+
 
     <!-- Сетка заметок -->
     <div v-else class="notes-container">
@@ -474,6 +454,66 @@ const getTruncatedTitle = (title) => {
 </template>
 
 <style scoped>
+
+.onboarding-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+  text-align: left;
+  max-width: 300px;
+}
+
+.onboarding-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #555;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #c9a9e8;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.step-link {
+  color: #c9a9e8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.step-link:hover {
+  text-decoration: underline;
+}
+
+.create-first-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 12px 28px;
+  background: #c9a9e8;
+  color: white;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.create-first-btn:hover {
+  background: #b794d4;
+}
+
+
 .notes-list-page {
   min-height: 100vh;
   background: #f5f5f5;
@@ -817,6 +857,26 @@ const getTruncatedTitle = (title) => {
   white-space: nowrap;
 }
 
+.tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;        /* ограничение высоты */
+  overflow-y: auto;          /* скролл при переполнении */
+  scrollbar-width: thin;
+  scrollbar-color: #c9a9e8 transparent;
+}
+
+.tags-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tags-container::-webkit-scrollbar-thumb {
+  background: #c9a9e8;
+  border-radius: 2px;
+}
+
+
 .note-footer {
   display: flex;
   justify-content: space-between;
@@ -838,6 +898,30 @@ const getTruncatedTitle = (title) => {
   color: #007bff;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.popular-tags-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;          /* не переносим */
+  overflow-x: auto;           /* горизонтальный скролл */
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #c9a9e8 transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.popular-tags-list::-webkit-scrollbar {
+  height: 4px;
+}
+
+.popular-tags-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.popular-tags-list::-webkit-scrollbar-thumb {
+  background: #c9a9e8;
+  border-radius: 2px;
 }
 
 /* Адаптивность */

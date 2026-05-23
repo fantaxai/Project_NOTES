@@ -157,10 +157,46 @@ const getFileIcon = (format) => {
   return icons[format] || '📎'
 }
 
-const downloadFile = (file) => {
-  // Здесь должна быть логика скачивания файла
-  console.log('Скачать файл:', file.name)
+// Заменяет старую downloadFile
+const openFile = (file) => {
+  if (!file.file_url) {
+    alert('Ссылка на файл недоступна')
+    return
+  }
+
+  const imageFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+  if (imageFormats.includes(file.format?.toLowerCase())) {
+    // Открываем картинку в новой вкладке
+    window.open(file.file_url, '_blank')
+    return
+  }
+
+  if (file.format?.toLowerCase() === 'pdf') {
+    // PDF открываем в новой вкладке для просмотра
+    window.open(file.file_url, '_blank')
+    return
+  }
+
+  // Остальные файлы — скачиваем
+  const link = document.createElement('a')
+  link.href = file.file_url
+  link.download = file.name
+  link.target = '_blank'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
+const downloadFileDirectly = (file) => {
+  if (!file.file_url) return
+  const link = document.createElement('a')
+  link.href = file.file_url
+  link.download = file.name
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+
 
 // Экспортируем метод для родительского компонента
 defineExpose({
@@ -188,7 +224,7 @@ defineExpose({
 
     <!-- Список файлов -->
     <div v-else-if="files.length > 0" class="files-list">
-      <div v-for="file in files" :key="file.id" class="file-item" @click="downloadFile(file)">
+      <div v-for="file in files" :key="file.id" class="file-item" @click="openFile(file)">
         <div class="file-preview">
           <img
             v-if="file.thumbnail && ['jpg', 'jpeg'].includes(file.format)"
@@ -206,6 +242,15 @@ defineExpose({
             <span class="file-format">{{ file.format.toUpperCase() }}</span>
           </div>
         </div>
+
+        <button
+          class="file-download-btn"
+          title="Скачать файл"
+          @click.stop="downloadFileDirectly(file)"
+        >
+          ⬇️
+        </button>
+
 
         <button
           class="file-delete-btn"
@@ -329,6 +374,24 @@ defineExpose({
   font-size: 12px;
   color: #999;
 }
+
+.file-download-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.file-download-btn:hover {
+  opacity: 1;
+  background: #e8f4ff;
+}
+
 
 .file-delete-btn {
   background: none;

@@ -1,5 +1,5 @@
 <template>
-  <nav class="main-nav">
+  <nav v-if="!isAuthPage" class="main-nav">
     <div class="nav-container">
       <div class="nav-left">
         <router-link to="/notes" class="nav-brand"> 💭 Копилка идей </router-link>
@@ -51,17 +51,19 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useNoteListStore } from '../stores/notelist'
 import { useAuthStore } from '../stores/auth'
 import SettingsModal from './SettingsModal.vue'
 import CheckList from './CheckList.vue'
 import { useChecklistStore } from '../stores/checklist'
+import { useRouter, useRoute } from 'vue-router'
 
-const router = useRouter()
 const noteListStore = useNoteListStore()
 const authStore = useAuthStore()
 const checklistStore = useChecklistStore()
+const router = useRouter()
+const route = useRoute()
+const isAuthPage = computed(() => route.path === '/auth')
 
 const showSettings = ref(false)
 const showCheckList = ref(false)
@@ -308,4 +310,4 @@ const handleGenerateChecklist = async (config) => {
     display: none;
   }
 }
-</style>
+</style>  

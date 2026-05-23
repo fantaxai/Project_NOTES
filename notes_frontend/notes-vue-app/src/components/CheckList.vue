@@ -236,6 +236,9 @@ onMounted(() => {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  /* Добавить: */
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -271,6 +274,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;   /* <-- вот это ключевое */
+  flex: 1;
+  min-height: 0;
 }
 
 .form-group {
@@ -509,15 +515,14 @@ onMounted(() => {
 /* Адаптивность для мобильных устройств */
 @media (max-width: 600px) {
   .modal-overlay {
+    align-items: flex-end;   /* модалка снизу на мобиле */
     padding: 0;
-    align-items: flex-end;
   }
 
   .modal-content {
     border-radius: 20px 20px 0 0;
     max-height: 85vh;
     padding: 20px 16px;
-    max-width: 100%;
   }
 
   .modal-header h3 {
@@ -525,7 +530,7 @@ onMounted(() => {
   }
 
   .categories-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;  /* 2 колонки на мобиле */
     gap: 6px;
   }
 
@@ -534,9 +539,13 @@ onMounted(() => {
     font-size: 13px;
   }
 
-  .mode-option {
-    padding: 12px;
-    gap: 10px;
+  .mode-selector {
+    gap: 6px;
+  }
+
+   .mode-option {
+    padding: 10px;
+    gap: 8px;
   }
 
   .mode-icon {
@@ -552,13 +561,12 @@ onMounted(() => {
   }
 
   .modal-actions {
-    flex-direction: column-reverse;
+    padding-top: 12px;
     gap: 8px;
   }
 
   .cancel-btn,
   .generate-btn {
-    width: 100%;
     padding: 12px;
     font-size: 15px;
   }

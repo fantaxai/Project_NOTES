@@ -1,7 +1,7 @@
 // stores/checklist.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { checklistApi } from '../api/index'
+import { checklistApi } from '../api/index.ts'
 
 export const useChecklistStore = defineStore('checklist', () => {
   const savedChecklist = localStorage.getItem('currentChecklist')
@@ -9,7 +9,7 @@ export const useChecklistStore = defineStore('checklist', () => {
   const checklists = ref([])
   const loading = ref(false)
   const error = ref(null)
-  const isLoaded = ref(false) // Флаг загрузки данных
+  const isLoaded = ref(false)
 
   // Загрузить все чеклисты
   const fetchChecklists = async () => {
@@ -20,22 +20,23 @@ export const useChecklistStore = defineStore('checklist', () => {
       checklists.value = response.data
       isLoaded.value = true
 
-      // Если есть текущий чеклист в localStorage, обновить его данные
       if (currentChecklist.value) {
         const updated = response.data.find((c) => c.id === currentChecklist.value.id)
         if (updated) {
           currentChecklist.value = updated
           localStorage.setItem('currentChecklist', JSON.stringify(updated))
         } else {
-          // Текущий чеклист был удалён на другом устройстве
           clearChecklist()
         }
       }
-
       return response.data
     } catch (err) {
+      if (err.response?.status === 401) {
+        console.warn('Checklist: не авторизован, пропускаем загрузку')
+        error.value = null
+        return []
+      }
       error.value = err.response?.data?.detail || err.message || 'Ошибка загрузки чеклистов'
-      console.error('Ошибка загрузки чеклистов:', err.response?.data || err.message)
       throw err
     } finally {
       loading.value = false
@@ -46,23 +47,21 @@ export const useChecklistStore = defineStore('checklist', () => {
   const generateChecklist = async (config) => {
     loading.value = true
     error.value = null
-
     try {
       const response = await checklistApi.generate({
         amount_of_ideas: config.amount_of_ideas,
         categories: config.categories,
       })
-
       currentChecklist.value = response.data
       localStorage.setItem('currentChecklist', JSON.stringify(response.data))
-
-      // Обновить список чеклистов
       await fetchChecklists()
-
       return response.data
     } catch (err) {
+      if (err.response?.status === 401) {
+        error.value = 'Необходимо войти в аккаунт'
+        throw err
+      }
       error.value = err.response?.data?.detail || err.message || 'Ошибка генерации чеклиста'
-      console.error('Ошибка генерации:', err.response?.data || err.message)
       throw err
     } finally {
       loading.value = false
@@ -79,11 +78,9 @@ export const useChecklistStore = defineStore('checklist', () => {
   const deleteChecklist = async (checklistId) => {
     try {
       await checklistApi.delete(checklistId)
-
       if (currentChecklist.value?.id === checklistId) {
         clearChecklist()
       }
-
       await fetchChecklists()
     } catch (err) {
       console.error('Ошибка удаления чеклиста:', err.response?.data || err.message)
@@ -95,7 +92,6 @@ export const useChecklistStore = defineStore('checklist', () => {
   const toggleItem = async (checklistId, itemId) => {
     try {
       const response = await checklistApi.toggleItem(checklistId, itemId)
-
       if (currentChecklist.value?.id === checklistId) {
         const item = currentChecklist.value.items.find((i) => i.id === itemId)
         if (item) {
@@ -103,7 +99,6 @@ export const useChecklistStore = defineStore('checklist', () => {
           localStorage.setItem('currentChecklist', JSON.stringify(currentChecklist.value))
         }
       }
-
       return response.data
     } catch (err) {
       console.error('Ошибка обновления пункта:', err.response?.data || err.message)
@@ -117,14 +112,11 @@ export const useChecklistStore = defineStore('checklist', () => {
     error.value = null
     try {
       const response = await checklistApi.regenerate(checklistId)
-      
       if (currentChecklist.value?.id === checklistId) {
         currentChecklist.value = response.data
         localStorage.setItem('currentChecklist', JSON.stringify(response.data))
       }
-      
       await fetchChecklists()
-      
       return response.data
     } catch (err) {
       error.value = err.response?.data?.detail || err.message || 'Ошибка регенерации чеклиста'
@@ -141,7 +133,6 @@ export const useChecklistStore = defineStore('checklist', () => {
     error.value = null
     try {
       const response = await checklistApi.saveAsNote(checklistId)
-      
       if (currentChecklist.value?.id === checklistId) {
         currentChecklist.value = {
           ...currentChecklist.value,
@@ -149,7 +140,6 @@ export const useChecklistStore = defineStore('checklist', () => {
         }
         localStorage.setItem('currentChecklist', JSON.stringify(currentChecklist.value))
       }
-      
       return response.data
     } catch (err) {
       error.value = err.response?.data?.error || err.message || 'Ошибка сохранения в заметку'
@@ -163,6 +153,15 @@ export const useChecklistStore = defineStore('checklist', () => {
   const clearChecklist = () => {
     currentChecklist.value = null
     error.value = null
+    localStorage.removeItem('currentChecklist')
+  }
+
+  const reset = () => {
+    currentChecklist.value = null
+    checklists.value = []
+    loading.value = false
+    error.value = null
+    isLoaded.value = false
     localStorage.removeItem('currentChecklist')
   }
 
@@ -185,6 +184,7 @@ export const useChecklistStore = defineStore('checklist', () => {
     deleteChecklist,
     toggleItem,
     regenerateChecklist,
+    reset,
     saveAsNote,
     clearChecklist,
     init,

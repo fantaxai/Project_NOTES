@@ -229,82 +229,71 @@ const exportToTxt = () => {
 
 const exportToPdf = async () => {
   try {
-    // Динамически импортируем jsPDF и html2canvas
     const { default: jsPDF } = await import('jspdf')
-    const html2canvas = (await import('html2canvas')).default
 
-    // Создаем временный контейнер для рендеринга
-    const container = document.createElement('div')
-    container.style.position = 'absolute'
-    container.style.left = '-9999px'
-    container.style.top = '0'
-    container.style.width = '800px'
-    container.style.padding = '40px'
-    container.style.backgroundColor = 'white'
-    container.style.fontFamily = 'Arial, sans-serif'
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
 
-    // Формируем HTML содержимое
-    let html = `
-      <div style="max-width: 800px; margin: 0 auto;">
-        <h1 style="font-size: 28px; font-weight: bold; color: #1a1a1a; margin-bottom: 20px;">
-          ${escapeHtml(props.note.title || 'Без названия')}
-        </h1>
-    `
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const margin = 40
+    const maxWidth = pageWidth - margin * 2
+    let y = margin
 
-    // Теги
-    if (props.note.tags && props.note.tags.length > 0) {
-      html += `<div style="margin-bottom: 30px;">`
-      props.note.tags.forEach((tag) => {
-        html += `<span style="display: inline-block; padding: 6px 14px; margin-right: 8px; margin-bottom: 8px; background-color: ${tag.color}20; color: ${tag.color}; border: 1px solid ${tag.color}; border-radius: 20px; font-size: 14px;">#${escapeHtml(tag.name)}</span>`
-      })
-      html += `</div>`
+    // Заголовок
+    doc.setFontSize(22)
+    doc.setFont('helvetica', 'bold')
+    const titleLines = doc.splitTextToSize(props.note.title || 'Без названия', maxWidth)
+    doc.text(titleLines, margin, y)
+    y += titleLines.length * 28 + 10
+
+    // Теги (текстом)
+    if (props.note.tags?.length) {
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      const tagsText = props.note.tags.map((t) => '#' + t.name).join('  ')
+      doc.text(tagsText, margin, y)
+      y += 20
     }
 
-    // Содержание (преобразуем переносы строк в <br>)
-    const contentHtml = escapeHtml(props.note.content || 'Нет содержания').replace(/\n/g, '<br>')
-    html += `<div style="font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 40px;">${contentHtml}</div>`
+    // Разделитель
+    doc.setDrawColor(200)
+    doc.line(margin, y, pageWidth - margin, y)
+    y += 16
 
-    // Даты
-    html += `<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0 20px;">`
-    html += `<div style="font-size: 12px; color: #999;">`
+    // Содержание
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    const plainContent = (props.note.content || 'Нет содержания').replace(/<[^>]*>/g, '')
+    const contentLines = doc.splitTextToSize(plainContent, maxWidth)
+
+    contentLines.forEach((line) => {
+      if (y > doc.internal.pageSize.getHeight() - margin) {
+        doc.addPage()
+        y = margin
+      }
+      doc.text(line, margin, y)
+      y += 16
+    })
+
+    // Даты внизу
+    y += 20
+    doc.setFontSize(9)
+    doc.setTextColor(150)
     if (props.note.creation_date) {
-      html += `<div>Создано: ${formatDate(props.note.creation_date)}</div>`
+      doc.text(`Создано: ${formatDate(props.note.creation_date)}`, margin, y)
+      y += 14
     }
     if (props.note.last_change_date) {
-      html += `<div>Обновлено: ${formatDate(props.note.last_change_date)}</div>`
+      doc.text(`Обновлено: ${formatDate(props.note.last_change_date)}`, margin, y)
     }
-    html += `</div>`
-    html += `</div>`
 
-    container.innerHTML = html
-    document.body.appendChild(container)
-
-    // Рендерим в canvas
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-    })
-
-    document.body.removeChild(container)
-
-    // Создаем PDF
-    const imgData = canvas.toDataURL('image/jpeg', 0.95)
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'px',
-      format: [canvas.width * 0.75, canvas.height * 0.75],
-    })
-
-    pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width * 0.75, canvas.height * 0.75)
-    pdf.save(`${props.note.title || 'заметка'}.pdf`)
-
+    doc.save(`${props.note.title || 'заметка'}.pdf`)
     showExportMenu.value = false
   } catch (error) {
     console.error('Ошибка экспорта в PDF:', error)
-    alert('Не удалось экспортировать в PDF. Убедитесь, что библиотеки установлены.')
+    alert('Не удалось экспортировать в PDF. Проверьте, установлен ли пакет jspdf.')
   }
 }
+
 
 // Вспомогательная функция для экранирования HTML
 const escapeHtml = (text) => {
