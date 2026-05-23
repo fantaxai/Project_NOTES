@@ -9,9 +9,12 @@ services:
     environment:
       - DEBUG=1
     volumes:
-      - notes_data:/app/notes/data
-      - static_files:/app/notes/staticfiles  # Сохраняем статику
+      - notes_data:/app/notes/data          # база данных — персистентная
+      - static_files:/app/notes/staticfiles  # статика
+    restart: unless-stopped                  # автоперезапуск если упал
 
 volumes:
   notes_data:
+    driver: local                            # явно указываем driver — volume не удалится случайно
   static_files:
+    driver: local

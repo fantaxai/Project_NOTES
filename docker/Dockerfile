@@ -2,9 +2,17 @@
 FROM node:18-alpine AS frontend-builder
 
 WORKDIR /frontend
-COPY notes_frontend/notes-vue-app/package*.json ./
+
+# Копируем package.json (lockfile не используем — он битый, пересоздаём)
+COPY notes_frontend/notes-vue-app/package.json ./
+
+# npm install создаст корректный lockfile на месте
 RUN npm install
+
+# Копируем весь исходный код фронтенда
 COPY notes_frontend/notes-vue-app/ .
+
+# Собираем
 RUN npm run build
 
 # Этап 2: Финальный образ с бэкендом
@@ -17,13 +25,15 @@ RUN pip install --no-cache-dir -r requirements.txt && \
     pip install gunicorn
 
 COPY notes/ /app/notes/
+
+# Копируем собранный фронтенд
 COPY --from=frontend-builder /frontend/dist /app/notes/static/frontend
 
 WORKDIR /app/notes
 
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput --clear
 
-COPY entrypoint.sh /app/notes/entrypoint.sh
+COPY docker/entrypoint.sh /app/notes/entrypoint.sh
 RUN chmod +x /app/notes/entrypoint.sh
 
 RUN mkdir -p /app/notes/data /app/notes/staticfiles && \

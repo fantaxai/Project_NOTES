@@ -6,11 +6,12 @@ echo "=== Starting Notes App ==="
 mkdir -p /app/notes/data
 
 echo "Applying database migrations..."
+# ВАЖНО: больше НЕ удаляем базу при ошибке миграции — иначе все пользователи слетают
 if ! python manage.py migrate --noinput; then
-    echo "Migration failed! Removing corrupted database..."
-    rm -f /app/notes/data/db.sqlite3
-    echo "Retrying migrations..."
-    python manage.py migrate --noinput
+    echo "ERROR: Migration failed! Check your models for errors."
+    echo "Database was NOT deleted to preserve user data."
+    echo "Fix the migration issue and restart the container."
+    exit 1
 fi
 
 # Загружаем фикстуры ТОЛЬКО если база пустая
