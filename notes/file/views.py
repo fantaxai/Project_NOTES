@@ -1,8 +1,8 @@
-# file/views.py
 from django.db.models import Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from note.models import Note
 
@@ -10,17 +10,22 @@ from .models import File
 from .serializers import FileCreateSerializer, FileSerializer
 
 
-class FileViewSet(viewsets.ModelViewSet):  # для управления файлами
-    queryset = File.objects.all().order_by("-creation_date")
+class FileViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
 
-    def get_serializer_class(self):  # выбор сериализатора в зависимости от действия
+    def get_queryset(self):
+        # Только файлы заметок текущего пользователя
+        return File.objects.filter(
+            note__user=self.request.user
+        ).order_by("-creation_date")
+
+    def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
             return FileCreateSerializer
         return FileSerializer
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        # если формат не указан, пытаемся определить из имени
         if not instance.format and instance.name:
             ext = instance.name.split(".")[-1].lower()
             if ext in ["pdf", "png", "jpg", "jpeg", "txt"]:
@@ -29,7 +34,6 @@ class FileViewSet(viewsets.ModelViewSet):  # для управления фай�
 
     @action(detail=False, methods=["get"])
     def by_note(self, request):
-        # получить все файлы для конкретной заметки
         note_id = request.query_params.get("note_id")
         if not note_id:
             return Response(
@@ -37,7 +41,8 @@ class FileViewSet(viewsets.ModelViewSet):  # для управления фай�
             )
 
         try:
-            note = Note.objects.get(id=note_id)
+            # Фильтруем по пользователю — чужую заметку не отдаём
+            note = Note.objects.get(id=note_id, user=request.user)
             files = self.get_queryset().filter(note=note)
             serializer = self.get_serializer(files, many=True)
             return Response(
@@ -50,12 +55,12 @@ class FileViewSet(viewsets.ModelViewSet):  # для управления фай�
             )
         except Note.DoesNotExist:
             return Response(
-                {"error": f"Заметка с id {note_id} не найдена"}, status=status.HTTP_404_NOT_FOUND
+                {"error": f"Заметка с id {note_id} не найдена"},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
     @action(detail=False, methods=["get"])
     def by_format(self, request):
-        # получить файлы по формату
         file_format = request.query_params.get("format")
         if not file_format:
             return Response(
@@ -64,7 +69,6 @@ class FileViewSet(viewsets.ModelViewSet):  # для управления фай�
 
         files = self.get_queryset().filter(format=file_format.lower())
         serializer = self.get_serializer(files, many=True)
-
         return Response({"format": file_format, "count": files.count(), "files": serializer.data})
 
     @action(detail=True, methods=["get"])
@@ -104,7 +108,6 @@ class FileViewSet(viewsets.ModelViewSet):  # для управления фай�
     def statistics(self, request):
         total_files = self.get_queryset().count()
         total_size = self.get_queryset().aggregate(total=Sum("size"))["total"] or 0
-        # Статистика по форматам
         formats_stats = {}
         for file_format in ["pdf", "png", "jpg", "jpeg", "txt"]:
             count = self.get_queryset().filter(format=file_format).count()
@@ -126,7 +129,6 @@ class FileViewSet(viewsets.ModelViewSet):  # для управления фай�
     @action(detail=False, methods=["delete"])
     def clear_old_files(self, request):
         from datetime import timedelta
-
         from django.utils import timezone
 
         days = int(request.data.get("days", 30))
