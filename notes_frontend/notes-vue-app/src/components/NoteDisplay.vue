@@ -477,12 +477,9 @@ const escapeHtml = (text) => {
       <div v-if="isEditing" class="idea-candidate-section">
         <label class="checkbox-label">
           <input v-model="editIsIdeaCandidate" type="checkbox" class="idea-checkbox" />
-          <span class="checkbox-text">
-            <span class="checkbox-icon">💡</span>
-            Кандидат для "Идеи дня"
-          </span>
+          <span class="checkbox-icon">💡</span>
+          <span class="checkbox-text">Кандидат для "Идеи дня"</span>
         </label>
-        <p class="checkbox-hint">Заметки с этой отметкой могут быть выбраны как "Идея дня"</p>
       </div>
       <!-- Содержание -->
       <div class="content-wrapper">
@@ -935,25 +932,19 @@ const escapeHtml = (text) => {
   height: 20px;
   cursor: pointer;
   accent-color: var(--primary-color, #c9a9e8);
-}
-
-.checkbox-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: var(--text-primary, #333);
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .checkbox-icon {
   font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-.checkbox-hint {
-  margin: 8px 0 0 32px;
-  font-size: 13px;
-  color: var(--text-secondary, #666);
-  font-style: italic;
+.checkbox-text {
+  font-weight: 500;
+  color: var(--text-primary, #333);
 }
 
 /* Содержание */
