@@ -68,10 +68,13 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
 
 <style scoped>
 .tag-list {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px); /* фиксированная высота под скролл */
 }
 
 .tag-list-header {
@@ -79,19 +82,20 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .tag-list-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .add-tag-btn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #007bff;
+  background: var(--primary-color);
   color: white;
   border: none;
   font-size: 20px;
@@ -100,10 +104,11 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .add-tag-btn:hover {
-  background: #0056b3;
+  background: var(--primary-hover);
 }
 
 .loading {
@@ -115,36 +120,32 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #007bff;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .error,
 .empty {
   text-align: center;
   padding: 20px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .error {
-  color: #dc3545;
+  color: var(--danger-color);
 }
 
 .retry-btn {
   margin-top: 8px;
   padding: 6px 12px;
-  background: #007bff;
+  background: var(--primary-color);
   color: white;
   border: none;
   border-radius: 6px;
@@ -152,10 +153,35 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   font-size: 12px;
 }
 
+/* Главное — скроллируемый контейнер с фиолетовой полоской */
 .tags-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+
+  /* Фиолетовый кастомный скроллбар */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) transparent;
+}
+
+.tags-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tags-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tags-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.tags-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
 }
 
 .tag-item {
@@ -163,20 +189,21 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
   border: 2px solid transparent;
+  flex-shrink: 0;
 }
 
 .tag-item:hover {
-  background: #e9ecef;
+  background: var(--hover-bg);
 }
 
 .tag-item.selected {
-  background: #e3f2fd;
-  border-color: #007bff;
+  background: var(--active-bg);
+  border-color: var(--primary-color);
 }
 
 .tag-info {
@@ -190,11 +217,12 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   height: 12px;
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .tag-name {
   font-size: 14px;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -221,16 +249,16 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
 }
 
 .edit-tag-btn:hover {
-  background: rgba(0, 123, 255, 0.1);
+  background: var(--primary-light);
 }
 
 .delete-tag-btn {
   font-size: 18px;
   font-weight: bold;
-  color: #dc3545;
+  color: var(--danger-color);
 }
 
 .delete-tag-btn:hover {
-  background: rgba(220, 53, 69, 0.1);
+  background: var(--danger-bg);
 }
 </style>

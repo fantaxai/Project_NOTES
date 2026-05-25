@@ -3,10 +3,11 @@
     <div class="modal-content" @click.stop>
       <div class="modal-header">
         <h3>{{ isEditing ? 'Редактировать тег' : 'Новый тег' }}</h3>
-        <button class="close-btn" @click="handleClose">×</button>
+        <button type="button" class="close-btn" @click="handleClose">×</button>
       </div>
 
-      <form @submit.prevent="handleSubmit">
+      <!-- ВАЖНО: убрали <form>, используем div — иначе браузер может триггерить навигацию -->
+      <div class="form-body">
         <div class="form-group">
           <label for="tagName">Название тега</label>
           <input
@@ -16,7 +17,7 @@
             placeholder="Введите название тега"
             class="tag-input"
             autofocus
-            required
+            @keydown.enter.prevent="handleSubmit"
           />
         </div>
 
@@ -50,11 +51,16 @@
 
         <div class="modal-actions">
           <button type="button" class="cancel-btn" @click="handleClose">Отмена</button>
-          <button type="submit" :disabled="!tagName.trim() || loading" class="save-btn">
+          <button
+            type="button"
+            :disabled="!tagName.trim() || loading"
+            class="save-btn"
+            @click="handleSubmit"
+          >
             {{ loading ? 'Сохранение...' : isEditing ? 'Сохранить' : 'Создать' }}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -88,18 +94,18 @@ const tagColor = ref('#C9A9E8')
 const isEditing = ref(false)
 
 const presetColors = [
-  '#FFB3B3', // Пастельный красный (нежно-розовый)
-  '#FFD6A5', // Пастельный оранжевый (персиковый)
-  '#FDFFB6', // Пастельный желтый (лимонный крем)
-  '#CAFFBF', // Пастельный зеленый (мятный)
-  '#9BF6FF', // Пастельный голубой (небесный)
-  '#A0C4FF', // Пастельный синий (васильковый)
-  '#BDB2FF', // Пастельный фиолетовый (лавандовый)
-  '#FFC6FF', // Пастельный розовый (розовое облако)
-  '#E4C1F9', // Пастельный пурпурный (сиреневый)
-  '#D8E2DC', // Пастельный серо-зеленый (шалфей)
-  '#FDE2E4', // Пастельный румянец
-  '#FAD2E1', // Пастельный персиковый
+  '#FFB3B3',
+  '#FFD6A5',
+  '#FDFFB6',
+  '#CAFFBF',
+  '#9BF6FF',
+  '#A0C4FF',
+  '#BDB2FF',
+  '#FFC6FF',
+  '#E4C1F9',
+  '#D8E2DC',
+  '#FDE2E4',
+  '#FAD2E1',
 ]
 
 watch(
@@ -119,13 +125,12 @@ watch(
 )
 
 const handleSubmit = () => {
-  if (tagName.value.trim()) {
-    emit('save', {
-      name: tagName.value.trim(),
-      color: tagColor.value,
-      id: props.tag?.id,
-    })
-  }
+  if (!tagName.value.trim() || props.loading) return
+  emit('save', {
+    name: tagName.value.trim(),
+    color: tagColor.value,
+    id: props.tag?.id,
+  })
 }
 
 const handleClose = () => {
@@ -140,7 +145,7 @@ const handleClose = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,7 +154,7 @@ const handleClose = () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
   padding: 24px;
   min-width: 400px;
@@ -179,7 +184,7 @@ const handleClose = () => {
 .modal-header h3 {
   margin: 0;
   font-size: 20px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .close-btn {
@@ -187,7 +192,7 @@ const handleClose = () => {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   padding: 0;
   width: 32px;
   height: 32px;
@@ -199,8 +204,8 @@ const handleClose = () => {
 }
 
 .close-btn:hover {
-  background: #f0f0f0;
-  color: #333;
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .form-group {
@@ -211,21 +216,23 @@ const handleClose = () => {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .tag-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   transition: border-color 0.2s;
 }
 
 .tag-input:focus {
   outline: none;
-  border-color: #c9a9e8;
+  border-color: var(--primary-color);
 }
 
 .color-picker-container {
@@ -238,19 +245,22 @@ const handleClose = () => {
   width: 60px;
   height: 40px;
   padding: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
+  background: var(--bg-secondary);
 }
 
 .color-text {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
   font-family: monospace;
   text-transform: uppercase;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .color-presets {
@@ -276,7 +286,7 @@ const handleClose = () => {
 }
 
 .error-message {
-  color: #dc3545;
+  color: var(--danger-color);
   font-size: 14px;
   margin-bottom: 16px;
 }
@@ -299,21 +309,21 @@ const handleClose = () => {
 }
 
 .cancel-btn {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
 .cancel-btn:hover {
-  background: #e0e0e0;
+  background: var(--hover-bg);
 }
 
 .save-btn {
-  background: #c9a9e8;
+  background: var(--primary-color);
   color: white;
 }
 
 .save-btn:hover:not(:disabled) {
-  background: #b794d4;
+  background: var(--primary-hover);
 }
 
 .save-btn:disabled {

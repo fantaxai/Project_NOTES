@@ -227,71 +227,126 @@ const exportToTxt = () => {
   showExportMenu.value = false
 }
 
-const exportToPdf = async () => {
-  try {
-    const { default: jsPDF } = await import('jspdf')
+const exportToPdf = () => {
+  const note = props.note
+  if (!note) return
 
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
+  const tagsHtml = note.tags?.length
+    ? note.tags
+        .map(
+          (t) => `
+        <span style="
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 500;
+          background-color: ${t.color}20;
+          color: ${t.color};
+          border: 1px solid ${t.color};
+          margin: 2px 4px 2px 0;
+        ">#${t.name}</span>`
+        )
+        .join('')
+    : ''
 
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const margin = 40
-    const maxWidth = pageWidth - margin * 2
-    let y = margin
+  const contentHtml = (note.content || 'Нет содержания')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>')
 
-    // Заголовок
-    doc.setFontSize(22)
-    doc.setFont('helvetica', 'bold')
-    const titleLines = doc.splitTextToSize(props.note.title || 'Без названия', maxWidth)
-    doc.text(titleLines, margin, y)
-    y += titleLines.length * 28 + 10
+  const createdDate = note.creation_date ? formatDate(note.creation_date) : ''
+  const updatedDate = note.last_change_date ? formatDate(note.last_change_date) : ''
 
-    // Теги (текстом)
-    if (props.note.tags?.length) {
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      const tagsText = props.note.tags.map((t) => '#' + t.name).join('  ')
-      doc.text(tagsText, margin, y)
-      y += 20
+  const html = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>${note.title || 'Заметка'}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      color: #1a1a1a;
+      background: white;
+      padding: 48px 56px;
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 15px;
+      line-height: 1.7;
     }
 
-    // Разделитель
-    doc.setDrawColor(200)
-    doc.line(margin, y, pageWidth - margin, y)
-    y += 16
-
-    // Содержание
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'normal')
-    const plainContent = (props.note.content || 'Нет содержания').replace(/<[^>]*>/g, '')
-    const contentLines = doc.splitTextToSize(plainContent, maxWidth)
-
-    contentLines.forEach((line) => {
-      if (y > doc.internal.pageSize.getHeight() - margin) {
-        doc.addPage()
-        y = margin
-      }
-      doc.text(line, margin, y)
-      y += 16
-    })
-
-    // Даты внизу
-    y += 20
-    doc.setFontSize(9)
-    doc.setTextColor(150)
-    if (props.note.creation_date) {
-      doc.text(`Создано: ${formatDate(props.note.creation_date)}`, margin, y)
-      y += 14
-    }
-    if (props.note.last_change_date) {
-      doc.text(`Обновлено: ${formatDate(props.note.last_change_date)}`, margin, y)
+    .header {
+      border-bottom: 2px solid #c9a9e8;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
     }
 
-    doc.save(`${props.note.title || 'заметка'}.pdf`)
-    showExportMenu.value = false
-  } catch (error) {
-    console.error('Ошибка экспорта в PDF:', error)
-    alert('Не удалось экспортировать в PDF. Проверьте, установлен ли пакет jspdf.')
-  }
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      word-break: break-word;
+      line-height: 1.3;
+      margin-bottom: 14px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .date-item {
+      white-space: nowrap;
+    }
+
+    .content {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #333;
+      word-break: break-word;
+    }
+
+    @media print {
+      body { padding: 20px 28px; }
+      @page { margin: 1.5cm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">${note.title || 'Без названия'}</div>
+    ${tagsHtml ? `<div class="tags">${tagsHtml}</div>` : ''}
+    <div class="dates">
+      ${createdDate ? `<span class="date-item">Создано: ${createdDate}</span>` : ''}
+      ${updatedDate ? `<span class="date-item">Обновлено: ${updatedDate}</span>` : ''}
+    </div>
+  </div>
+  <div class="content">${contentHtml}</div>
+</body>
+</html>`
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${props.note.title || 'заметка'}.html`
+  link.click()
+  URL.revokeObjectURL(url)
+  showExportMenu.value = false
 }
 
 

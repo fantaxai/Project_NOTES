@@ -340,7 +340,7 @@
           <button class="close-btn" @click="closeEditTagModal">×</button>
         </div>
 
-        <form @submit.prevent="saveTag">
+        <div class="form-body">
           <div class="form-group">
             <label for="editTagName">Название тега</label>
             <input
@@ -384,11 +384,11 @@
 
           <div class="modal-actions">
             <button type="button" class="cancel-btn" @click="closeEditTagModal">Отмена</button>
-            <button type="submit" :disabled="!editTagName.trim() || savingTag" class="save-btn">
+            <button type="button" :disabled="!editTagName.trim() || savingTag" class="save-btn" @click="saveTag">
               {{ savingTag ? 'Сохранение...' : editingTag ? 'Сохранить' : 'Создать' }}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
@@ -847,7 +847,6 @@ const closeManageTagsModal = () => {
 
 // Открыть модальное окно создания тега
 const openCreateTagModal = () => {
-  showManageTagsModal.value = false
   editingTag.value = null
   editTagName.value = ''
   editTagColor.value = '#C9A9E8'
@@ -857,7 +856,6 @@ const openCreateTagModal = () => {
 
 // Редактировать тег
 const editTag = (tag) => {
-  showManageTagsModal.value = false
   editingTag.value = tag
   editTagName.value = tag.name
   editTagColor.value = tag.color
@@ -872,6 +870,7 @@ const closeEditTagModal = () => {
   editTagName.value = ''
   editTagColor.value = '#C9A9E8'
   editTagError.value = null
+  showManageTagsModal.value = true
 }
 
 // Сохранить тег
@@ -1854,6 +1853,27 @@ onBeforeUnmount(() => {
 .manage-tags-content {
   max-height: 500px;
   overflow-y: auto;
+  padding-right: 4px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color, #c9a9e8) transparent;
+}
+
+.manage-tags-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.manage-tags-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.manage-tags-content::-webkit-scrollbar-thumb {
+  background: var(--primary-color, #c9a9e8);
+  border-radius: 4px;
+}
+
+.manage-tags-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover, #b794d4);
 }
 
 .manage-tags-header {
