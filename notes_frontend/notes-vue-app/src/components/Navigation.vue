@@ -6,7 +6,7 @@
       </div>
 
       <div class="nav-center">
-        <router-link to="/notes" class="nav-link" active-class="active">
+        <router-link to="/notes" class="nav-link nav-outline" active-class="active">
           Все идеи
           <span v-if="totalCount > 0" class="nav-count">{{ totalCount }}</span>
         </router-link>
@@ -190,6 +190,23 @@ const handleGenerateChecklist = async (config) => {
 .nav-secondary:hover {
   background: var(--primary-color, #c9a9e8) !important;
   color: white !important;
+}
+
+.nav-outline {
+  background: var(--primary-light, #f0e6ff);
+  color: var(--primary-color, #c9a9e8) !important;
+  border: 1px solid var(--primary-color, #c9a9e8);
+}
+
+.nav-outline:hover {
+  background: var(--primary-color, #c9a9e8) !important;
+  color: white !important;
+}
+
+.nav-outline.active {
+  background: var(--primary-color, #c9a9e8) !important;
+  color: white !important;
+  border-color: var(--primary-color, #c9a9e8);
 }
 
 .nav-count {

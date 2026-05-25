@@ -76,7 +76,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTagStore } from '../stores/tags'
 import TagList from '../components/TagList.vue'
-import TagForm from '../components/TagForm.vue' // Исправлено
+import TagForm from '../components/TagForm.vue'
 
 const router = useRouter()
 const tagStore = useTagStore()

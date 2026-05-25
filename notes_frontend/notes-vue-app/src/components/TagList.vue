@@ -74,7 +74,7 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px); /* фиксированная высота под скролл */
+  height: calc(100vh - 120px);
 }
 
 .tag-list-header {
@@ -210,6 +210,8 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .tag-color-dot {
@@ -224,6 +226,8 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   font-size: 14px;
   color: var(--text-primary);
   font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .tag-actions {
@@ -231,6 +235,7 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   gap: 4px;
   opacity: 0;
   transition: opacity 0.2s;
+  flex-shrink: 0;
 }
 
 .tag-item:hover .tag-actions {
@@ -261,4 +266,121 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
 .delete-tag-btn:hover {
   background: var(--danger-bg);
 }
+
+@media (max-width: 768px) {
+  .tag-list {
+    padding: 16px;
+    height: auto;
+    max-height: 400px;
+  }
+
+  .tag-list-header h3 {
+    font-size: 16px;
+  }
+
+  .add-tag-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  .tag-item {
+    padding: 8px 10px;
+  }
+
+  .tag-name {
+    font-size: 13px;
+  }
+
+  .tag-actions {
+    opacity: 0.7;
+  }
+
+  .edit-tag-btn,
+  .delete-tag-btn {
+    padding: 4px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tag-list {
+    padding: 12px;
+    border-radius: 12px;
+    max-height: 350px;
+  }
+
+  .tag-list-header {
+    margin-bottom: 12px;
+  }
+
+  .tag-list-header h3 {
+    font-size: 15px;
+  }
+
+  .add-tag-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+
+  .tags-container {
+    gap: 6px;
+    padding-right: 2px;
+  }
+
+  /* Элемент тега */
+  .tag-item {
+    padding: 8px 10px;
+  }
+
+  .tag-info {
+    gap: 6px;
+  }
+
+  .tag-color-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .tag-name {
+    font-size: 12px;
+  }
+
+  .tag-actions {
+    opacity: 0.8;
+  }
+
+  .edit-tag-btn,
+  .delete-tag-btn {
+    padding: 3px 5px;
+    font-size: 11px;
+  }
+
+  .delete-tag-btn {
+    font-size: 16px;
+  }
+
+  .edit-tag-btn,
+  .delete-tag-btn,
+  .add-tag-btn {
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .empty,
+  .error {
+    padding: 16px;
+    font-size: 13px;
+  }
+
+  .retry-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
 </style>
