@@ -84,12 +84,9 @@
       <div class="form-group">
         <label class="checkbox-label">
           <input v-model="isIdeaCandidate" type="checkbox" class="idea-checkbox" />
-          <span class="checkbox-text">
-            <span class="checkbox-icon">💡</span>
-            Отметить как кандидата для "Идеи дня"
-          </span>
+          <span class="checkbox-icon">💡</span>
+          <span>Отметить как кандидата для "Идеи дня"</span>
         </label>
-        <p class="checkbox-hint">Заметки с этой отметкой могут быть выбраны как "Идея дня"</p>
       </div>
 
       <div class="form-group">
@@ -693,25 +690,31 @@ onBeforeUnmount(() => {
   height: 20px;
   cursor: pointer;
   accent-color: var(--primary-color, #c9a9e8);
-}
-
-.checkbox-text {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: var(--text-primary, #333);
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .checkbox-icon {
   font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-.checkbox-hint {
-  margin: 8px 0 0 32px;
-  font-size: 13px;
-  color: var(--text-secondary, #666);
-  font-style: italic;
+.checkbox-label > span:last-child {
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .checkbox-label {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .checkbox-label > span:last-child {
+    font-size: 14px;
+    white-space: normal; /* Разрешаем перенос на мобильных */
+  }
 }
 
 /* Заголовок секции тегов */
