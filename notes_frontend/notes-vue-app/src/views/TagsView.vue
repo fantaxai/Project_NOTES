@@ -382,4 +382,146 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
 }
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 12px 16px;
+  }
+
+  .back-btn {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .placeholder {
+    width: 60px;
+  }
+
+  .tags-content {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .tags-sidebar {
+    width: 100%;
+  }
+
+  .tags-main {
+    padding: 16px;
+  }
+
+  .tag-notes-header h2 {
+    font-size: 20px;
+  }
+
+  .note-item {
+    padding: 16px;
+  }
+
+  .note-item h3 {
+    font-size: 16px;
+  }
+
+  .note-preview {
+    font-size: 13px;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Телефоны (до 480px) */
+@media (max-width: 480px) {
+  .page-header {
+    padding: 10px 12px;
+  }
+
+  .back-btn {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+
+  .page-title {
+    font-size: 16px;
+  }
+
+  .placeholder {
+    width: 50px;
+  }
+
+  .tags-content {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .tags-sidebar {
+    /* Стили для TagList будут применяться из его собственных стилей */
+  }
+
+  .tags-main {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .tag-notes-header {
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .tag-notes-header h2 {
+    font-size: 16px;
+    word-break: break-word;
+  }
+
+  .refresh-btn {
+    font-size: 18px;
+    padding: 6px;
+  }
+
+  .loading {
+    padding: 30px;
+  }
+
+  .spinner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .error,
+  .empty {
+    padding: 30px 20px;
+    font-size: 14px;
+  }
+
+  .notes-list {
+    gap: 12px;
+  }
+
+  .note-item {
+    padding: 12px;
+  }
+
+  .note-item h3 {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .note-preview {
+    font-size: 12px;
+    margin-bottom: 8px;
+    -webkit-line-clamp: 2;
+  }
+
+  .note-date {
+    font-size: 11px;
+  }
+}
+
 </style>
