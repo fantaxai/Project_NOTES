@@ -74,7 +74,9 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  height: auto;
+  min-height: 400px;
+  max-height: calc(100vh - 120px);
 }
 
 .tag-list-header {

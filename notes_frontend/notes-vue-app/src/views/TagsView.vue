@@ -8,17 +8,19 @@
 
     <div class="tags-content">
       <div class="tags-sidebar">
-        <TagList
-          :tags="tagStore.tags"
-          :loading="tagStore.loading"
-          :error="tagStore.error"
-          :selected-tag-id="selectedTag?.id"
-          @select="handleSelectTag"
-          @edit="handleEditTag"
-          @delete="handleDeleteTag"
-          @create="handleCreateTag"
-          @retry="loadTags"
-        />
+        <div class="tag-list-wrapper">
+          <TagList
+            :tags="tagStore.tags"
+            :loading="tagStore.loading"
+            :error="tagStore.error"
+            :selected-tag-id="selectedTag?.id"
+            @select="handleSelectTag"
+            @edit="handleEditTag"
+            @delete="handleDeleteTag"
+            @create="handleCreateTag"
+            @retry="loadTags"
+          />
+        </div>
       </div>
 
       <div class="tags-main">
@@ -410,6 +412,10 @@ onMounted(() => {
   .tags-sidebar {
     width: 100%;
   }
+  
+  .tag-list-wrapper :deep(.tag-list) {
+    max-height: 400px;
+  }
 
   .tags-main {
     padding: 16px;
@@ -436,7 +442,6 @@ onMounted(() => {
   }
 }
 
-/* Телефоны (до 480px) */
 @media (max-width: 480px) {
   .page-header {
     padding: 10px 12px;
@@ -461,7 +466,11 @@ onMounted(() => {
   }
 
   .tags-sidebar {
-    /* Стили для TagList будут применяться из его собственных стилей */
+    width: 100%;
+  }
+  
+  .tag-list-wrapper :deep(.tag-list) {
+    max-height: 350px;
   }
 
   .tags-main {
