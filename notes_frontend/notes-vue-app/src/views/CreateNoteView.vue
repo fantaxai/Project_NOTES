@@ -84,7 +84,7 @@
       <div class="form-group">
         <label class="checkbox-label">
           <input v-model="isIdeaCandidate" type="checkbox" class="idea-checkbox" />
-          <span class="checkbox-icon">💡</span>
+          <span class="checkbox-icon">  💡</span>
           <span>Отметить как кандидата для "Идеи дня"</span>
         </label>
       </div>
