@@ -342,4 +342,155 @@ const handleClose = () => {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+@media (max-width: 768px) {
+  .modal-content {
+    min-width: auto;
+    width: 90%;
+    max-width: 90%;
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .modal-header h3 {
+    font-size: 18px;
+  }
+
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .tag-input {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .color-picker-container {
+    gap: 8px;
+  }
+
+  .color-input {
+    width: 50px;
+    height: 36px;
+  }
+
+  .color-text {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .color-presets {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .modal-actions {
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    backdrop-filter: blur(2px);
+  }
+
+  .modal-content {
+    width: 92%;
+    max-width: 92%;
+    padding: 16px;
+    border-radius: 16px;
+    margin: 16px;
+  }
+
+  .modal-header {
+    margin-bottom: 14px;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .close-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+
+  .tag-input {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .color-picker-container {
+    gap: 6px;
+  }
+
+  .color-input {
+    width: 44px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .color-text {
+    padding: 8px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .color-presets {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .color-preset {
+    border-radius: 6px;
+  }
+
+  .error-message {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .modal-actions {
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+}
 </style>
