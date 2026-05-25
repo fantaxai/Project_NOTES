@@ -228,7 +228,7 @@
         >
           <div class="note-header">
             <div class="card-title-wrapper">
-              <h3 class="note-title" v-html="highlightText(note.title || 'Без названия')"></h3>
+              <h3 class="note-title" v-html="highlightText(truncateTitle(note.title))"></h3>
               <div class="card-icons">
                 <span
                   v-if="note.is_idea_candidate"
@@ -256,7 +256,7 @@
             </button>
           </div>
 
-          <p class="note-preview" v-html="highlightText(getPreview(note.content))"></p>
+          <p class="note-preview" v-html="highlightText(getFormattedPreview(note.content))"></p>
 
           <div v-if="note.tags && note.tags.length" class="note-tags">
             <button
@@ -739,6 +739,35 @@ const toggleTagFilter = (tagId) => {
   }
 }
 
+// Обрезка заголовка до 25 символов
+const truncateTitle = (title) => {
+  if (!title) return 'Без названия'
+  return title.length > 25 ? title.substring(0, 25) + '...' : title
+}
+
+// Обрезка содержания: первые 3 строки, в каждой строке до 30 символов
+const truncateContent = (content) => {
+  if (!content) return 'Нет содержания'
+  
+  let text = content.replace(/<[^>]*>/g, '')
+  
+  const lines = text.split('\n')
+  
+  const truncatedLines = lines.slice(0, 3).map(line => {
+    if (line.length > 30) {
+      return line.substring(0, 30) + '...'
+    }
+    return line
+  })
+
+  return truncatedLines.join('\n')
+}
+
+const getFormattedPreview = (content) => {
+  const truncated = truncateContent(content)
+  return truncated.replace(/\n/g, '<br>')
+}
+
 const selectSingleTag = (tagId) => {
   selectedTagIds.value = [tagId]
   filterMode.value = 'or'
@@ -901,12 +930,6 @@ const deleteTag = async (tag) => {
   } finally {
     deletingTagId.value = null
   }
-}
-
-const getPreview = (content) => {
-  if (!content) return 'Нет содержания'
-  const plainText = content.replace(/<[^>]*>/g, '')
-  return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText
 }
 
 const formatDate = (dateString) => {
@@ -1518,6 +1541,10 @@ onBeforeUnmount(() => {
   min-width: 0;
   word-break: break-word;
   overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .candidate-icon {
@@ -1563,6 +1590,7 @@ onBeforeUnmount(() => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  white-space: normal;
 }
 
 .note-tags {
