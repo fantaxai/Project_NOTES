@@ -4,7 +4,7 @@
       <div class="nav-left">
         <router-link to="/notes" class="nav-brand">💭 Копилка идей</router-link>
       </div>
-
+ 
       <div class="nav-center">
         <router-link to="/notes" class="nav-link" active-class="active">
           Все идеи
@@ -19,8 +19,17 @@
           Чеклист
         </button>
       </div>
-
+ 
       <div class="nav-right">
+        <!-- Кнопка помощи / тур -->
+        <button
+          class="help-btn"
+          title="Показать обучающий тур"
+          @click="startTour"
+        >
+          ?
+        </button>
+ 
         <div class="user-info">
           <div class="user-avatar">
             {{ authStore.user?.username?.[0]?.toUpperCase() || '?' }}
@@ -31,7 +40,7 @@
         <button class="settings-btn" title="Настройки" @click="openSettings">⚙️</button>
       </div>
     </div>
-
+ 
     <SettingsModal v-if="showSettings" @close="showSettings = false" />
     <CheckList
       v-if="showCheckList"
@@ -40,7 +49,7 @@
     />
   </nav>
 </template>
-
+ 
 <script setup>
 import { ref, computed } from 'vue'
 import { useNoteListStore } from '../stores/notelist'
@@ -49,26 +58,33 @@ import SettingsModal from './SettingsModal.vue'
 import CheckList from './CheckList.vue'
 import { useChecklistStore } from '../stores/checklist'
 import { useRouter, useRoute } from 'vue-router'
-
+ 
 const noteListStore = useNoteListStore()
 const authStore = useAuthStore()
 const checklistStore = useChecklistStore()
 const router = useRouter()
 const route = useRoute()
 const isAuthPage = computed(() => route.path === '/auth')
-
+ 
 const showSettings = ref(false)
 const showCheckList = ref(false)
 const totalCount = computed(() => noteListStore.totalCount)
-
+ 
+const emit = defineEmits(['start-tour'])
+ 
 const openSettings = () => { showSettings.value = true }
 const generateChecklist = () => { showCheckList.value = true }
-
+ 
+// Запускаем тур — эмитим событие наверх в App.vue
+const startTour = () => {
+  emit('start-tour')
+}
+ 
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/auth')
 }
-
+ 
 const handleGenerateChecklist = async (config) => {
   try {
     await checklistStore.generateChecklist({
@@ -81,7 +97,7 @@ const handleGenerateChecklist = async (config) => {
   }
 }
 </script>
-
+ 
 <style scoped>
 .main-nav {
   background: var(--bg-primary, white);
@@ -90,7 +106,7 @@ const handleGenerateChecklist = async (config) => {
   top: 0;
   z-index: 1000;
 }
-
+ 
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -100,7 +116,7 @@ const handleGenerateChecklist = async (config) => {
   align-items: center;
   height: 64px;
 }
-
+ 
 .nav-brand {
   font-size: 18px;
   font-weight: 700;
@@ -109,14 +125,13 @@ const handleGenerateChecklist = async (config) => {
   white-space: nowrap;
 }
 .nav-brand:hover { opacity: 0.8; }
-
+ 
 .nav-center {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
-/* Все три кнопки — одинаковый стиль как у Чеклиста */
+ 
 .nav-link {
   display: flex;
   align-items: center;
@@ -130,25 +145,22 @@ const handleGenerateChecklist = async (config) => {
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-
-  /* Стиль как у Чеклиста: светлый фон + фиолетовая обводка */
   background: var(--primary-light, #f0e6ff);
   color: var(--primary-color, #c9a9e8);
   border: 1px solid var(--primary-color, #c9a9e8);
 }
-
+ 
 .nav-link:hover {
   background: var(--primary-color, #c9a9e8);
   color: white;
 }
-
-/* Активная кнопка — залитая */
+ 
 .nav-link.active {
   background: var(--primary-color, #c9a9e8);
   color: white;
   border-color: var(--primary-color, #c9a9e8);
 }
-
+ 
 .nav-count {
   background: rgba(255, 255, 255, 0.4);
   color: inherit;
@@ -157,23 +169,49 @@ const handleGenerateChecklist = async (config) => {
   font-size: 12px;
   font-weight: 600;
 }
-
+ 
 .nav-link.active .nav-count {
   background: rgba(255,255,255,0.3);
 }
-
+ 
 .btn-icon {
   font-size: 16px;
   font-weight: 600;
   line-height: 1;
 }
-
+ 
 .nav-right {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
+ 
+/* Кнопка помощи */
+.help-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color, #c9a9e8);
+  background: var(--primary-light, #f0e6ff);
+  color: var(--primary-color, #c9a9e8);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+ 
+.help-btn:hover {
+  background: var(--primary-color, #c9a9e8);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(201, 169, 232, 0.4);
+}
+ 
 .user-info {
   display: flex;
   align-items: center;
@@ -182,7 +220,7 @@ const handleGenerateChecklist = async (config) => {
   background: var(--bg-secondary, #f5f5f5);
   border-radius: 30px;
 }
-
+ 
 .user-avatar {
   width: 32px;
   height: 32px;
@@ -196,7 +234,7 @@ const handleGenerateChecklist = async (config) => {
   font-weight: 600;
   flex-shrink: 0;
 }
-
+ 
 .user-name {
   font-size: 14px;
   font-weight: 500;
@@ -206,7 +244,7 @@ const handleGenerateChecklist = async (config) => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
+ 
 .logout-btn {
   padding: 4px 12px;
   background: none;
@@ -220,7 +258,7 @@ const handleGenerateChecklist = async (config) => {
   white-space: nowrap;
 }
 .logout-btn:hover { background: var(--danger-bg, #fee); }
-
+ 
 .settings-btn {
   background: none;
   border: none;
@@ -235,7 +273,7 @@ const handleGenerateChecklist = async (config) => {
   color: var(--text-primary, #333);
 }
 .settings-btn:hover { background: var(--hover-bg, #f5f5f5); }
-
+ 
 @media (max-width: 768px) {
   .nav-container {
     flex-wrap: wrap;
@@ -256,5 +294,6 @@ const handleGenerateChecklist = async (config) => {
   }
   .user-info { padding: 4px 6px; }
   .user-name { display: none; }
+  .help-btn { width: 28px; height: 28px; font-size: 13px; }
 }
 </style>
