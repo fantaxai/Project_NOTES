@@ -157,6 +157,8 @@ const handleGenerateChecklist = async (config) => {
   cursor: pointer;
   line-height: 1;
   vertical-align: middle;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .nav-link:hover {
