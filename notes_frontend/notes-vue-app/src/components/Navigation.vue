@@ -148,12 +148,15 @@ const handleGenerateChecklist = async (config) => {
   border-radius: 8px;
   transition: all 0.2s;
   font-weight: 500;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: none;
   border: none;
   cursor: pointer;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .nav-link:hover {
@@ -314,9 +317,10 @@ const handleGenerateChecklist = async (config) => {
   }
 
   .nav-link {
-    flex: 1;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    min-width: 100px;
+    min-height: 40px;
   }
 
   .user-info {
