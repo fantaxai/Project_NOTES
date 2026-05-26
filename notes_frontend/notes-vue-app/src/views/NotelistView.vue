@@ -1652,6 +1652,7 @@ onBeforeUnmount(() => {
 }
 
 /* Модальные окна */
+/* Модальные окна */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1664,32 +1665,59 @@ onBeforeUnmount(() => {
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+  padding: 16px; /* Добавляем отступы для мобильных */
 }
 
 .modal-content {
   background: var(--bg-primary, white);
   border-radius: 16px;
   padding: 24px;
-  min-width: 400px;
-  max-width: 90%;
+  width: 100%; /* По умолчанию на всю ширину */
+  max-width: 500px; /* Максимальная ширина */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.2s ease-out;
   border: 1px solid var(--border-color, transparent);
+  max-height: 90vh; /* Ограничение по высоте */
+  overflow-y: auto; /* Скролл если не помещается */
 }
 
+.modal-large {
+  max-width: 600px; /* Чуть шире для больших экранов */
+}
+
+/* Адаптивность для мобильных */
 @media (max-width: 600px) {
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-start; /* Прижимаем к верху на маленьких экранах */
+    padding-top: 20px;
+  }
+
   .modal-content {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    max-height: 90vh;
-    overflow-y: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh;
     padding: 16px;
-    margin: 0;
+    border-radius: 12px;
   }
 
   .modal-large {
-    width: 95vw !important;
-    max-width: 95vw !important;
+    max-width: 100%;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
   }
 
   .color-presets {
@@ -1707,29 +1735,43 @@ onBeforeUnmount(() => {
   }
 
   .manage-tags-content {
-    max-height: 60vh;
+    max-height: 50vh; /* Уменьшаем высоту для мобильных */
   }
 
-  .modal-header h3 {
-    font-size: 16px;
-  }
-
-  .modal-actions {
+  .manage-tags-header {
     flex-direction: column;
+    gap: 8px;
   }
 
-  .cancel-btn,
-  .save-btn {
+  .add-tag-manage-btn {
     width: 100%;
-    text-align: center;
-    justify-content: center;
+  }
+
+  .manage-tag-item {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .manage-tag-info {
+    width: 100%;
+  }
+
+  .tag-notes-count {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  .manage-tag-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .tag-search-input {
+    font-size: 16px; /* Предотвращает зум на iOS */
   }
 }
 
-.modal-large {
-  min-width: 500px;
-  max-width: 600px;
-}
 
 @keyframes slideIn {
   from {
