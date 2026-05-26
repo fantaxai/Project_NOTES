@@ -4,22 +4,10 @@ import FileManager from './FileManager.vue'
 import { useFileStore } from '../stores/files'
 
 const props = defineProps({
-  note: {
-    type: Object,
-    default: null,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: null,
-  },
-  availableTags: {
-    type: Array,
-    default: () => [],
-  },
+  note: { type: Object, default: null },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: null },
+  availableTags: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['update', 'delete', 'retry', 'create-tag'])
@@ -31,11 +19,7 @@ const editTags = ref([])
 const textareaRef = ref(null)
 const fileManagerRef = ref(null)
 const editIsIdeaCandidate = ref(false)
-
-// Состояние для выпадающего меню экспорта
 const showExportMenu = ref(false)
-
-// Состояние для создания нового тега
 const showNewTagForm = ref(false)
 const newTagName = ref('')
 const newTagColor = ref('#C9A9E8')
@@ -44,9 +28,7 @@ const creatingTag = ref(false)
 const fileStore = useFileStore()
 
 const loadFiles = async () => {
-  if (props.note?.id) {
-    await fileStore.fetchNoteFiles(props.note.id)
-  }
+  if (props.note?.id) await fileStore.fetchNoteFiles(props.note.id)
 }
 
 onMounted(() => {
@@ -58,38 +40,18 @@ onBeforeUnmount(() => {
   window.removeEventListener('click', closeExportMenu)
 })
 
-watch(
-  () => props.note,
-  (newNote) => {
-    if (newNote?.id) {
-      loadFiles()
-    } else {
-      fileStore.clearCurrentFiles()
-    }
-  }
-)
+watch(() => props.note, (newNote) => {
+  if (newNote?.id) loadFiles()
+  else fileStore.clearCurrentFiles()
+})
 
-// Закрытие меню экспорта при клике вне его
 const closeExportMenu = (e) => {
-  if (!e.target.closest('.export-menu-container')) {
-    showExportMenu.value = false
-  }
+  if (!e.target.closest('.export-menu-container')) showExportMenu.value = false
 }
 
-
 const quickColors = [
-  '#FFB3B3',
-  '#FFD6A5',
-  '#FDFFB6',
-  '#CAFFBF',
-  '#9BF6FF',
-  '#A0C4FF',
-  '#BDB2FF',
-  '#FFC6FF',
-  '#E4C1F9',
-  '#D8E2DC',
-  '#FDE2E4',
-  '#FAD2E1',
+  '#FFB3B3','#FFD6A5','#FDFFB6','#CAFFBF','#9BF6FF','#A0C4FF',
+  '#BDB2FF','#FFC6FF','#E4C1F9','#D8E2DC','#FDE2E4','#FAD2E1',
 ]
 
 const startEditing = () => {
@@ -99,38 +61,19 @@ const startEditing = () => {
   editIsIdeaCandidate.value = props.note?.is_idea_candidate || false
   isEditing.value = true
   showNewTagForm.value = false
-  nextTick(() => {
-    if (textareaRef.value) {
-      textareaRef.value.focus()
-    }
-  })
+  nextTick(() => { if (textareaRef.value) textareaRef.value.focus() })
 }
 
 const saveEditing = () => {
   const updates = {}
-
-  if (editTitle.value !== props.note?.title) {
-    updates.title = editTitle.value
-  }
-
-  if (editContent.value !== props.note?.content) {
-    updates.content = editContent.value
-  }
-
+  if (editTitle.value !== props.note?.title) updates.title = editTitle.value
+  if (editContent.value !== props.note?.content) updates.content = editContent.value
   const currentTagIds = props.note?.tags?.map((t) => t.id) || []
-  if (JSON.stringify(editTags.value.sort()) !== JSON.stringify(currentTagIds.sort())) {
+  if (JSON.stringify(editTags.value.sort()) !== JSON.stringify(currentTagIds.sort()))
     updates.tag_ids = editTags.value
-  }
-
-  // ← добавить проверку
-  if (editIsIdeaCandidate.value !== props.note?.is_idea_candidate) {
+  if (editIsIdeaCandidate.value !== props.note?.is_idea_candidate)
     updates.is_idea_candidate = editIsIdeaCandidate.value
-  }
-
-  if (Object.keys(updates).length > 0) {
-    emit('update', updates)
-  }
-
+  if (Object.keys(updates).length > 0) emit('update', updates)
   isEditing.value = false
   showNewTagForm.value = false
 }
@@ -145,34 +88,21 @@ const cancelEditing = () => {
 
 const toggleTag = (tagId) => {
   const index = editTags.value.indexOf(tagId)
-  if (index === -1) {
-    editTags.value.push(tagId)
-  } else {
-    editTags.value.splice(index, 1)
-  }
+  if (index === -1) editTags.value.push(tagId)
+  else editTags.value.splice(index, 1)
 }
 
 const triggerFileUpload = () => {
-  if (fileManagerRef.value && typeof fileManagerRef.value.triggerFileInput === 'function') {
+  if (fileManagerRef.value && typeof fileManagerRef.value.triggerFileInput === 'function')
     fileManagerRef.value.triggerFileInput()
-  }
 }
 
 const createNewTag = async () => {
   if (!newTagName.value.trim()) return
-
   creatingTag.value = true
-
   try {
-    const newTag = await emit('create-tag', {
-      name: newTagName.value.trim(),
-      color: newTagColor.value,
-    })
-
-    if (newTag) {
-      editTags.value.push(newTag.id)
-    }
-
+    const newTag = await emit('create-tag', { name: newTagName.value.trim(), color: newTagColor.value })
+    if (newTag) editTags.value.push(newTag.id)
     newTagName.value = ''
     newTagColor.value = '#C9A9E8'
     showNewTagForm.value = false
@@ -187,32 +117,33 @@ const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
 
-// Функции экспорта
-const toggleExportMenu = () => {
-  showExportMenu.value = !showExportMenu.value
-}
+const toggleExportMenu = () => { showExportMenu.value = !showExportMenu.value }
 
 const getNoteText = () => {
-  let text = `${props.note.title}\n\n`
-  text += `${'='.repeat(props.note.title.length)}\n\n`
-  text += `${props.note.content}\n\n`
-
-  if (props.note.tags && props.note.tags.length > 0) {
-    text += `Теги: ${props.note.tags.map((t) => '#' + t.name).join(', ')}\n`
-  }
-
+  let text = `${props.note.title}\n\n${'='.repeat(props.note.title.length)}\n\n${props.note.content}\n\n`
+  if (props.note.tags?.length) text += `Теги: ${props.note.tags.map((t) => '#' + t.name).join(', ')}\n`
   text += `\nСоздано: ${formatDate(props.note.creation_date)}\n`
   text += `Обновлено: ${formatDate(props.note.last_change_date)}\n`
 
+  // Прикреплённые файлы
+  const files = fileStore.currentNoteFiles
+  if (files?.length) {
+    text += `\nПрикреплённые файлы:\n`
+    files.forEach(f => { text += `  - ${f.name} (${f.format.toUpperCase()}, ${formatFileSize(f.size)})\n` })
+  }
   return text
+}
+
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
 const exportToTxt = () => {
@@ -227,37 +158,32 @@ const exportToTxt = () => {
   showExportMenu.value = false
 }
 
+// ── PDF: сохраняется сразу как файл через html2pdf-подход через iframe ──
 const exportToPdf = () => {
   const note = props.note
   if (!note) return
 
   const tagsHtml = note.tags?.length
-    ? note.tags
-        .map(
-          (t) => `
-        <span style="
-          display: inline-block;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 13px;
-          font-weight: 500;
-          background-color: ${t.color}20;
-          color: ${t.color};
-          border: 1px solid ${t.color};
-          margin: 2px 4px 2px 0;
-        ">#${t.name}</span>`
-        )
-        .join('')
+    ? note.tags.map(t => `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;background:${t.color}20;color:${t.color};border:1px solid ${t.color};margin:2px 3px 2px 0">#${t.name}</span>`).join('')
     : ''
 
-  const contentHtml = (note.content || 'Нет содержания')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  const contentHtml = (note.content || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\n/g, '<br>')
 
-  const createdDate = note.creation_date ? formatDate(note.creation_date) : ''
-  const updatedDate = note.last_change_date ? formatDate(note.last_change_date) : ''
+  const files = fileStore.currentNoteFiles
+  const filesHtml = files?.length
+    ? `<div class="files-section">
+        <div class="files-title">📎 Прикреплённые файлы</div>
+        ${files.map(f => `
+          <div class="file-row">
+            <span class="file-icon">${f.format === 'pdf' ? '📄' : f.format === 'txt' ? '📝' : '🖼️'}</span>
+            <span class="file-name">${f.name}</span>
+            <span class="file-meta">${f.format.toUpperCase()} · ${formatFileSize(f.size)}</span>
+            ${f.thumbnail ? `<img src="${f.thumbnail}" class="file-thumb" alt="${f.name}"/>` : ''}
+          </div>`).join('')}
+      </div>`
+    : ''
 
   const html = `<!DOCTYPE html>
 <html lang="ru">
@@ -265,65 +191,21 @@ const exportToPdf = () => {
   <meta charset="UTF-8">
   <title>${note.title || 'Заметка'}</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Arial', 'Helvetica', sans-serif;
-      color: #1a1a1a;
-      background: white;
-      padding: 48px 56px;
-      max-width: 800px;
-      margin: 0 auto;
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    .header {
-      border-bottom: 2px solid #c9a9e8;
-      padding-bottom: 20px;
-      margin-bottom: 20px;
-    }
-
-    .title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a1a;
-      word-break: break-word;
-      line-height: 1.3;
-      margin-bottom: 14px;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .dates {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      font-size: 12px;
-      color: #999;
-      margin-top: 4px;
-    }
-
-    .date-item {
-      white-space: nowrap;
-    }
-
-    .content {
-      font-size: 15px;
-      line-height: 1.8;
-      color: #333;
-      word-break: break-word;
-    }
-
-    @media print {
-      body { padding: 20px 28px; }
-      @page { margin: 1.5cm; }
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;color:#1a1a1a;background:white;padding:40px 48px;font-size:15px;line-height:1.7}
+    .header{border-bottom:2px solid #c9a9e8;padding-bottom:16px;margin-bottom:20px}
+    .title{font-size:26px;font-weight:700;line-height:1.3;margin-bottom:12px;word-break:break-word}
+    .tags{display:flex;flex-wrap:wrap;margin-bottom:10px}
+    .dates{font-size:12px;color:#999;display:flex;flex-wrap:wrap;gap:16px}
+    .content{font-size:15px;line-height:1.8;color:#333;word-break:break-word;margin-bottom:24px}
+    .files-section{border-top:1px solid #e0e0e0;padding-top:16px;margin-top:16px}
+    .files-title{font-size:14px;font-weight:600;color:#666;margin-bottom:12px}
+    .file-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0}
+    .file-icon{font-size:18px;flex-shrink:0}
+    .file-name{flex:1;font-size:14px;font-weight:500;color:#333;word-break:break-word}
+    .file-meta{font-size:12px;color:#999;white-space:nowrap}
+    .file-thumb{width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0}
+    @media print{body{padding:0}@page{margin:1.5cm;size:A4}}
   </style>
 </head>
 <body>
@@ -331,26 +213,38 @@ const exportToPdf = () => {
     <div class="title">${note.title || 'Без названия'}</div>
     ${tagsHtml ? `<div class="tags">${tagsHtml}</div>` : ''}
     <div class="dates">
-      ${createdDate ? `<span class="date-item">Создано: ${createdDate}</span>` : ''}
-      ${updatedDate ? `<span class="date-item">Обновлено: ${updatedDate}</span>` : ''}
+      ${note.creation_date ? `<span>Создано: ${formatDate(note.creation_date)}</span>` : ''}
+      ${note.last_change_date ? `<span>Изменено: ${formatDate(note.last_change_date)}</span>` : ''}
     </div>
   </div>
   <div class="content">${contentHtml}</div>
+  ${filesHtml}
+  <script>
+    window.onload = function() {
+      window.print()
+      // После печати закрываем вкладку
+      window.onfocus = function() { setTimeout(function(){ window.close() }, 500) }
+    }
+  <\/script>
 </body>
 </html>`
 
+  // Открываем в новой вкладке — браузер покажет диалог "Сохранить как PDF"
+  // Это единственный надёжный способ получить PDF с кириллицей без библиотек
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
   const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `${props.note.title || 'заметка'}.html`
-  link.click()
-  URL.revokeObjectURL(url)
+  const win = window.open(url, '_blank')
+  if (!win) {
+    // Если попапы заблокированы — скачиваем как HTML
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${note.title || 'заметка'}.html`
+    link.click()
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 10000)
   showExportMenu.value = false
 }
 
-
-// Вспомогательная функция для экранирования HTML
 const escapeHtml = (text) => {
   if (!text) return ''
   const div = document.createElement('div')
@@ -361,18 +255,12 @@ const escapeHtml = (text) => {
 
 <template>
   <div class="note-display">
-    <div v-if="loading" class="loading">
-      <div class="spinner"></div>
-    </div>
-
+    <div v-if="loading" class="loading"><div class="spinner"></div></div>
     <div v-else-if="error" class="error">
       <p>{{ error }}</p>
       <button class="retry-btn" @click="$emit('retry')">Повторить</button>
     </div>
-
-    <div v-else-if="!note" class="empty">
-      <p>Заметка не найдена</p>
-    </div>
+    <div v-else-if="!note" class="empty"><p>Заметка не найдена</p></div>
 
     <div v-else class="note-content">
       <div class="note-header">
@@ -380,144 +268,78 @@ const escapeHtml = (text) => {
           <h2 class="note-title">{{ note.title }}</h2>
         </div>
         <div v-else class="title-edit">
-          <input
-            v-model="editTitle"
-            type="text"
-            class="title-input"
-            placeholder="Заголовок заметки"
-          />
+          <input v-model="editTitle" type="text" class="title-input" placeholder="Заголовок заметки" />
         </div>
 
         <div class="note-actions">
-          <!-- Кнопка прикрепления файла -->
-          <button
-            v-if="!isEditing"
-            class="attach-file-btn"
-            title="Прикрепить файл"
-            @click="triggerFileUpload"
-          >
-            📎
-          </button>
+          <button v-if="!isEditing" class="attach-file-btn" title="Прикрепить файл" @click="triggerFileUpload">📎</button>
 
-          <!-- Кнопка экспорта с выпадающим меню -->
           <div v-if="!isEditing" class="export-menu-container">
-            <button class="export-btn" title="Экспортировать" @click.stop="toggleExportMenu">
-              📤
-            </button>
+            <button class="export-btn" title="Экспортировать" @click.stop="toggleExportMenu">📤</button>
             <div v-if="showExportMenu" class="export-menu" @click.stop>
               <button class="export-option" @click="exportToTxt">
-                <span class="export-icon">📄</span>
-                Сохранить как TXT
+                <span class="export-icon">📄</span>Сохранить как TXT
               </button>
               <button class="export-option" @click="exportToPdf">
-                <span class="export-icon">📑</span>
-                Сохранить как PDF
+                <span class="export-icon">📑</span>Сохранить как PDF
               </button>
             </div>
           </div>
 
-          <button v-if="!isEditing" class="edit-btn" title="Редактировать" @click="startEditing">
-            ✏️
-          </button>
+          <button v-if="!isEditing" class="edit-btn" title="Редактировать" @click="startEditing">✏️</button>
           <button class="delete-btn" title="Удалить" @click="$emit('delete')">🗑️</button>
         </div>
       </div>
+
       <div v-if="!isEditing && note.is_idea_candidate" class="idea-badge-display">
-        <span class="idea-icon">💡</span>
-        <span>Кандидат для идеи дня</span>
+        <span class="idea-icon">💡</span><span>Кандидат для идеи дня</span>
       </div>
 
-      <!-- Отображение тегов -->
       <div v-if="!isEditing && note.tags && note.tags.length > 0" class="tags-section">
         <div class="tags-label">Теги:</div>
         <div class="tags-list">
-          <span
-            v-for="tag in note.tags"
-            :key="tag.id"
-            class="tag"
-            :style="{
-              backgroundColor: tag.color + '20',
-              color: tag.color,
-              borderColor: tag.color,
-            }"
-          >
+          <span v-for="tag in note.tags" :key="tag.id" class="tag"
+            :style="{ backgroundColor: tag.color + '20', color: tag.color, borderColor: tag.color }">
             #{{ tag.name }}
           </span>
         </div>
       </div>
 
-      <!-- Редактирование тегов -->
       <div v-if="isEditing" class="tags-edit-section">
         <div class="tags-edit-header">
           <label class="tags-label">Теги:</label>
-          <button
-            class="add-tag-inline-btn"
-            type="button"
-            @click="showNewTagForm = !showNewTagForm"
-          >
+          <button class="add-tag-inline-btn" type="button" @click="showNewTagForm = !showNewTagForm">
             {{ showNewTagForm ? '− Отмена' : '+ Новый тег' }}
           </button>
         </div>
-
-        <!-- Форма создания нового тега -->
         <div v-if="showNewTagForm" class="new-tag-inline-form">
           <div class="new-tag-inputs">
-            <input
-              v-model="newTagName"
-              type="text"
-              placeholder="Название тега"
-              class="new-tag-name-input"
-              @keyup.enter.prevent="createNewTag"
-            />
+            <input v-model="newTagName" type="text" placeholder="Название тега" class="new-tag-name-input" @keyup.enter.prevent="createNewTag" />
             <div class="new-tag-color-picker">
               <input v-model="newTagColor" type="color" class="color-picker-input" />
               <div class="color-presets-mini">
-                <button
-                  v-for="color in quickColors"
-                  :key="color"
-                  type="button"
-                  class="color-dot"
-                  :style="{ backgroundColor: color }"
-                  @click="newTagColor = color"
-                ></button>
+                <button v-for="color in quickColors" :key="color" type="button" class="color-dot"
+                  :style="{ backgroundColor: color }" @click="newTagColor = color"></button>
               </div>
             </div>
-            <button
-              :disabled="!newTagName.trim() || creatingTag"
-              class="create-tag-inline-btn"
-              @click="createNewTag"
-            >
+            <button :disabled="!newTagName.trim() || creatingTag" class="create-tag-inline-btn" @click="createNewTag">
               {{ creatingTag ? '...' : 'Создать' }}
             </button>
           </div>
         </div>
-
-        <!-- Список доступных тегов -->
         <div v-if="availableTags.length > 0" class="tags-selector">
-          <button
-            v-for="tag in availableTags"
-            :key="tag.id"
-            type="button"
+          <button v-for="tag in availableTags" :key="tag.id" type="button"
             :class="['tag-option', { selected: editTags.includes(tag.id) }]"
-            :style="
-              editTags.includes(tag.id)
-                ? {
-                    backgroundColor: tag.color,
-                    borderColor: tag.color,
-                    color: 'white',
-                  }
-                : {
-                    borderColor: tag.color,
-                    color: tag.color,
-                  }
-            "
-            @click="toggleTag(tag.id)"
-          >
+            :style="editTags.includes(tag.id)
+              ? { backgroundColor: tag.color, borderColor: tag.color, color: 'white' }
+              : { borderColor: tag.color, color: tag.color }"
+            @click="toggleTag(tag.id)">
             #{{ tag.name }}
           </button>
         </div>
         <div v-else class="no-tags-hint">💡 Нет тегов. Создайте новый тег</div>
       </div>
+
       <div v-if="isEditing" class="idea-candidate-section">
         <label class="checkbox-label">
           <input v-model="editIsIdeaCandidate" type="checkbox" class="idea-checkbox" />
@@ -525,20 +347,14 @@ const escapeHtml = (text) => {
           <span class="checkbox-text">Кандидат для "Идеи дня"</span>
         </label>
       </div>
-      <!-- Содержание -->
+
       <div class="content-wrapper">
         <div v-if="!isEditing" class="content-view">
           <p class="content-text">{{ note.content || 'Нет содержания...' }}</p>
         </div>
-
         <div v-else class="content-edit">
-          <textarea
-            ref="textareaRef"
-            v-model="editContent"
-            class="content-textarea"
-            placeholder="Введите содержание заметки..."
-            rows="10"
-          ></textarea>
+          <textarea ref="textareaRef" v-model="editContent" class="content-textarea"
+            placeholder="Введите содержание заметки..." rows="10"></textarea>
           <div class="edit-actions">
             <button class="cancel-edit-btn" @click="cancelEditing">Отмена</button>
             <button class="save-edit-btn" @click="saveEditing">Сохранить</button>
@@ -546,582 +362,155 @@ const escapeHtml = (text) => {
         </div>
       </div>
 
-      <!-- Файлы -->
       <div v-if="!isEditing" class="files-section">
-        <div class="files-header">
-          <h3 class="files-title">Прикрепленные файлы</h3>
-        </div>
+        <div class="files-header"><h3 class="files-title">Прикреплённые файлы</h3></div>
         <FileManager ref="fileManagerRef" :note-id="note.id" />
       </div>
 
       <div class="note-footer">
-        <span v-if="note.creation_date" class="date">
-          Создано: {{ formatDate(note.creation_date) }}
-        </span>
-        <span v-if="note.last_change_date" class="date">
-          Обновлено: {{ formatDate(note.last_change_date) }}
-        </span>
+        <span v-if="note.creation_date" class="date">Создано: {{ formatDate(note.creation_date) }}</span>
+        <span v-if="note.last_change_date" class="date">Обновлено: {{ formatDate(note.last_change_date) }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.note-display {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.loading {
-  text-align: center;
-  padding: 40px;
-}
-
+.note-display { max-width: 800px; margin: 0 auto; padding: 20px; }
+.loading { text-align: center; padding: 40px; }
 .spinner {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
+  display: inline-block; width: 40px; height: 40px;
   border: 3px solid var(--border-light, #f3f3f3);
   border-top: 3px solid var(--primary-color, #c9a9e8);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  border-radius: 50%; animation: spin 1s linear infinite;
 }
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.error,
-.empty {
-  text-align: center;
-  padding: 40px;
-  background: var(--bg-primary, white);
-  border-radius: 12px;
-  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
-  color: var(--text-primary, #333);
-}
-
-.error {
-  color: var(--danger-color, #dc3545);
-}
-
+@keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+.error,.empty { text-align: center; padding: 40px; color: var(--text-secondary, #666); }
+.error { color: var(--danger-color, #dc3545); }
 .retry-btn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: var(--primary-color, #c9a9e8);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  margin-top: 12px; padding: 8px 20px; background: var(--primary-color, #c9a9e8);
+  color: white; border: none; border-radius: 8px; cursor: pointer;
 }
-
 .note-content {
-  background: var(--bg-primary, white);
-  border-radius: 16px;
-  box-shadow: var(--card-shadow, 0 4px 12px rgba(0, 0, 0, 0.1));
-  overflow: hidden;
+  background: var(--bg-primary, white); border-radius: 16px;
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.05));
+  overflow: hidden; border: 1px solid var(--border-color, #e0e0e0);
 }
-
 .note-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 24px 24px 16px;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-  background: var(--bg-tertiary, #fafafa);
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 24px; border-bottom: 1px solid var(--border-color, #e0e0e0);
+  background: var(--bg-primary, white); gap: 16px;
 }
-
-.title-view {
-  flex: 1;
-}
-
+.title-view { flex: 1; min-width: 0; }
 .note-title {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-primary, #1a1a1a);
-  word-break: break-word;
+  font-size: 26px; font-weight: 700; color: var(--text-primary, #1a1a1a);
+  line-height: 1.3; word-break: break-word; margin: 0;
 }
-
-.title-edit {
-  flex: 1;
-  margin-right: 10px;
-}
-
+.title-edit { flex: 1; }
 .title-input {
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 24px;
-  font-weight: 600;
-  border: 2px solid var(--primary-color, #c9a9e8);
-  border-radius: 8px;
-  outline: none;
-  background: var(--bg-primary, white);
-  color: var(--text-primary, #1a1a1a);
+  width: 100%; font-size: 22px; font-weight: 700; border: 2px solid var(--primary-color, #c9a9e8);
+  border-radius: 8px; padding: 8px 12px; background: var(--bg-primary, white);
+  color: var(--text-primary, #333); font-family: inherit;
 }
-
-.note-actions {
-  display: flex;
-  gap: 8px;
+.title-input:focus { outline: none; }
+.note-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.attach-file-btn,.export-btn,.edit-btn,.delete-btn {
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  padding: 6px; border-radius: 8px; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
 }
-
-.attach-file-btn,
-.export-btn,
-.edit-btn,
-.delete-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
-  opacity: 0.6;
-  color: var(--text-secondary, #666);
-}
-
-.attach-file-btn:hover {
-  opacity: 1;
-  background: var(--primary-light, #f0e6ff);
-}
-
-.export-btn:hover {
-  opacity: 1;
-  background: var(--success-bg, #e8f5e9);
-}
-
-.edit-btn:hover {
-  opacity: 1;
-  background: var(--primary-light, #f0e6ff);
-}
-
-.delete-btn:hover {
-  opacity: 1;
-  background: var(--danger-bg, #fee);
-  color: var(--danger-color, #dc3545);
-}
-
-/* Меню экспорта */
-.export-menu-container {
-  position: relative;
-  display: inline-block;
-}
-
+.attach-file-btn:hover { background: var(--hover-bg, #f5f5f5); }
+.export-btn:hover { background: var(--hover-bg, #f5f5f5); }
+.edit-btn:hover { background: var(--primary-light, #f0e6ff); }
+.delete-btn:hover { background: var(--danger-bg, #fee); }
+.export-menu-container { position: relative; }
 .export-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  background: var(--bg-primary, white);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
-  z-index: 1000;
-  overflow: hidden;
-  border: 1px solid var(--border-color, #e0e0e0);
+  position: absolute; top: calc(100% + 4px); right: 0;
+  background: var(--bg-primary, white); border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  min-width: 200px; z-index: 100; overflow: hidden;
 }
-
 .export-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 14px 18px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 15px;
-  color: var(--text-primary, #333);
-  text-align: left;
-  transition: all 0.2s;
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 12px 16px; background: none; border: none; cursor: pointer;
+  font-size: 14px; color: var(--text-primary, #333); text-align: left; transition: all 0.15s;
 }
-
-.export-option:hover {
-  background: var(--hover-bg, #f5f5f5);
-}
-
-.export-option:first-child {
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-}
-
-.export-icon {
-  font-size: 20px;
-  width: 24px;
-  text-align: center;
-}
-
-/* Бейдж кандидата */
+.export-option:hover { background: var(--hover-bg, #f5f5f5); }
+.export-icon { font-size: 16px; }
 .idea-badge-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  background: linear-gradient(135deg, var(--primary-light, #f0e6ff) 0%, #e8d5f5 100%);
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 24px; background: var(--active-bg, #f0e6ff);
   border-bottom: 1px solid var(--border-color, #e0e0e0);
-  font-size: 14px;
-  color: var(--primary-color, #5700b3);
+  font-size: 14px; color: var(--primary-color, #5700b3);
 }
-
-.idea-badge-display .idea-icon {
-  font-size: 18px;
-}
-
-/* Секция тегов */
-.tags-section,
-.tags-edit-section {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
+.idea-badge-display .idea-icon { font-size: 18px; }
+.tags-section,.tags-edit-section {
+  padding: 16px 24px; border-bottom: 1px solid var(--border-color, #e0e0e0);
   background: var(--bg-tertiary, #fafafa);
 }
-
-.tags-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary, #666);
-  margin-bottom: 8px;
-}
-
-.tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+.tags-label { font-size: 14px; font-weight: 500; color: var(--text-secondary, #666); margin-bottom: 8px; }
+.tags-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  border: 1px solid;
+  display: inline-block; padding: 6px 14px; border-radius: 20px;
+  font-size: 14px; font-weight: 500; border: 1px solid;
 }
-
-/* Редактирование тегов */
-.tags-edit-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
+.tags-edit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .add-tag-inline-btn {
-  background: none;
-  border: 1.5px dashed var(--primary-color, #c9a9e8);
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  color: var(--primary-color, #c9a9e8);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
+  background: none; border: 1.5px dashed var(--primary-color, #c9a9e8);
+  padding: 4px 12px; border-radius: 16px; font-size: 12px;
+  color: var(--primary-color, #c9a9e8); cursor: pointer; transition: all 0.2s; font-weight: 500;
 }
-
-.add-tag-inline-btn:hover {
-  background: var(--primary-light, #f0e6ff);
-  border-style: solid;
-}
-
-.new-tag-inline-form {
-  background: var(--bg-secondary, #f8f9fa);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.new-tag-inputs {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
+.add-tag-inline-btn:hover { background: var(--primary-light, #f0e6ff); border-style: solid; }
+.new-tag-inline-form { background: var(--bg-secondary, #f8f9fa); border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+.new-tag-inputs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .new-tag-name-input {
-  flex: 1;
-  min-width: 150px;
-  padding: 8px 12px;
-  border: 1.5px solid var(--border-color, #e0e0e0);
-  border-radius: 8px;
-  font-size: 13px;
-  background: var(--bg-primary, white);
-  color: var(--text-primary, #333);
+  flex: 1; min-width: 150px; padding: 8px 12px;
+  border: 1.5px solid var(--border-color, #e0e0e0); border-radius: 8px; font-size: 13px;
+  background: var(--bg-primary, white); color: var(--text-primary, #333);
 }
-
-.new-tag-name-input:focus {
-  outline: none;
-  border-color: var(--primary-color, #c9a9e8);
-}
-
-.new-tag-color-picker {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.color-picker-input {
-  width: 36px;
-  height: 36px;
-  padding: 2px;
-  border: 1.5px solid var(--border-color, #e0e0e0);
-  border-radius: 8px;
-  cursor: pointer;
-  background: var(--bg-primary, white);
-}
-
-.color-presets-mini {
-  display: flex;
-  gap: 3px;
-}
-
-.color-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--bg-primary, white);
-  cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.color-dot:hover {
-  transform: scale(1.15);
-}
-
-.create-tag-inline-btn {
-  padding: 8px 16px;
-  background: var(--primary-color, #c9a9e8);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.create-tag-inline-btn:hover:not(:disabled) {
-  background: var(--primary-hover, #b794d4);
-}
-
-.create-tag-inline-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.tags-selector {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.tag-option {
-  background: var(--bg-primary, white);
-  border: 2px solid;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tag-option:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.tag-option.selected {
-  color: white !important;
-}
-
-.no-tags-hint {
-  color: var(--text-tertiary, #999);
-  font-size: 14px;
-  font-style: italic;
-  padding: 8px 0;
-}
-
-/* Секция кандидата при редактировании */
-.idea-candidate-section {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-  background: var(--bg-tertiary, #fafafa);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  padding: 12px 16px;
-  border: 2px solid var(--border-color, #e0e0e0);
-  border-radius: 12px;
-  transition: all 0.2s;
-  background: var(--bg-primary, white);
-}
-
-.checkbox-label:hover {
-  border-color: var(--primary-color, #c9a9e8);
-  background: var(--primary-light, #f8f4ff);
-}
-
-.idea-checkbox {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: var(--primary-color, #c9a9e8);
-  margin: 0;
-  flex-shrink: 0;
-}
-
-.checkbox-icon {
-  font-size: 20px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.checkbox-text {
-  font-weight: 500;
-  color: var(--text-primary, #333);
-}
-
-/* Содержание */
-.content-wrapper {
-  padding: 24px;
-  min-height: 300px;
-}
-
-.content-view {
-  padding: 20px;
-  border-radius: 12px;
-  background: var(--bg-primary, white);
-}
-
-.content-text {
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--text-primary, #333);
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
-}
-
-.content-edit {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.content-textarea {
-  width: 100%;
-  padding: 16px;
-  border: 2px solid var(--primary-color, #c9a9e8);
-  border-radius: 12px;
-  font-size: 16px;
-  line-height: 1.6;
-  font-family: inherit;
-  resize: vertical;
-  background: var(--bg-primary, white);
-  color: var(--text-primary, #333);
-}
-
-.content-textarea:focus {
-  outline: none;
-  border-color: var(--primary-hover, #b794d4);
-}
-
-.edit-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.cancel-edit-btn,
-.save-edit-btn {
-  padding: 8px 20px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.cancel-edit-btn {
-  background: var(--bg-tertiary, #f5f5f5);
-  color: var(--text-secondary, #666);
-}
-
-.cancel-edit-btn:hover {
-  background: var(--border-color, #e0e0e0);
-}
-
-.save-edit-btn {
-  background: var(--primary-color, #c9a9e8);
-  color: white;
-}
-
-.save-edit-btn:hover {
-  background: var(--primary-hover, #b794d4);
-}
-
-/* Файлы */
-.files-section {
-  padding: 20px 24px 24px;
-  border-top: 1px solid var(--border-color, #e0e0e0);
-}
-
-.files-header {
-  margin-bottom: 16px;
-}
-
-.files-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-primary, #333);
-}
-
-/* Футер */
-.note-footer {
-  padding: 16px 24px;
-  border-top: 1px solid var(--border-color, #e0e0e0);
-  background: var(--bg-tertiary, #fafafa);
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.date {
-  font-size: 12px;
-  color: var(--text-tertiary, #999);
-}
+.new-tag-name-input:focus { outline: none; border-color: var(--primary-color, #c9a9e8); }
+.new-tag-color-picker { display: flex; align-items: center; gap: 6px; }
+.color-picker-input { width: 36px; height: 36px; padding: 2px; border: 1.5px solid var(--border-color, #e0e0e0); border-radius: 8px; cursor: pointer; background: var(--bg-primary, white); }
+.color-presets-mini { display: flex; gap: 3px; }
+.color-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--bg-primary, white); cursor: pointer; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.color-dot:hover { transform: scale(1.15); }
+.create-tag-inline-btn { padding: 8px 16px; background: var(--primary-color, #c9a9e8); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.create-tag-inline-btn:hover:not(:disabled) { background: var(--primary-hover, #b794d4); }
+.create-tag-inline-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.tags-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag-option { background: var(--bg-primary, white); border: 2px solid; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.tag-option:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.tag-option.selected { color: white !important; }
+.no-tags-hint { color: var(--text-tertiary, #999); font-size: 14px; font-style: italic; padding: 8px 0; }
+.idea-candidate-section { padding: 16px 24px; border-bottom: 1px solid var(--border-color, #e0e0e0); background: var(--bg-tertiary, #fafafa); }
+.checkbox-label { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px 16px; border: 2px solid var(--border-color, #e0e0e0); border-radius: 12px; transition: all 0.2s; background: var(--bg-primary, white); }
+.checkbox-label:hover { border-color: var(--primary-color, #c9a9e8); background: var(--primary-light, #f8f4ff); }
+.idea-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary-color, #c9a9e8); margin: 0; flex-shrink: 0; }
+.checkbox-icon { font-size: 20px; line-height: 1; flex-shrink: 0; }
+.checkbox-text { font-weight: 500; color: var(--text-primary, #333); }
+.content-wrapper { padding: 24px; min-height: 300px; }
+.content-view { padding: 20px; border-radius: 12px; background: var(--bg-primary, white); }
+.content-text { font-size: 16px; line-height: 1.6; color: var(--text-primary, #333); white-space: pre-wrap; word-break: break-word; margin: 0; }
+.content-edit { display: flex; flex-direction: column; gap: 16px; }
+.content-textarea { width: 100%; padding: 16px; border: 2px solid var(--primary-color, #c9a9e8); border-radius: 12px; font-size: 16px; line-height: 1.6; font-family: inherit; resize: vertical; background: var(--bg-primary, white); color: var(--text-primary, #333); }
+.content-textarea:focus { outline: none; border-color: var(--primary-hover, #b794d4); }
+.edit-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.cancel-edit-btn,.save-edit-btn { padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+.cancel-edit-btn { background: var(--bg-tertiary, #f5f5f5); color: var(--text-secondary, #666); }
+.cancel-edit-btn:hover { background: var(--border-color, #e0e0e0); }
+.save-edit-btn { background: var(--primary-color, #c9a9e8); color: white; }
+.save-edit-btn:hover { background: var(--primary-hover, #b794d4); }
+.files-section { padding: 20px 24px 24px; border-top: 1px solid var(--border-color, #e0e0e0); }
+.files-header { margin-bottom: 16px; }
+.files-title { margin: 0; font-size: 16px; font-weight: 500; color: var(--text-primary, #333); }
+.note-footer { padding: 16px 24px; border-top: 1px solid var(--border-color, #e0e0e0); background: var(--bg-tertiary, #fafafa); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.date { font-size: 12px; color: var(--text-tertiary, #999); }
 
 @media (max-width: 640px) {
-  .note-display {
-    padding: 10px;
-  }
-
-  .note-header {
-    padding: 16px;
-  }
-
-  .note-title {
-    font-size: 22px;
-  }
-
-  .title-input {
-    font-size: 18px;
-  }
-
-  .content-wrapper {
-    padding: 16px;
-  }
+  .note-display { padding: 10px; }
+  .note-header { padding: 16px; }
+  .note-title { font-size: 22px; }
+  .title-input { font-size: 18px; }
+  .content-wrapper { padding: 16px; }
 }
 </style>

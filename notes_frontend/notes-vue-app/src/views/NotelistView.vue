@@ -894,6 +894,7 @@ const saveTag = async () => {
     }
 
     await tagStore.fetchTags()
+    await noteListStore.fetchNotes()  
     closeEditTagModal()
   } catch (err) {
     editTagError.value = err.response?.data?.detail || 'Ошибка сохранения тега'
@@ -1674,6 +1675,55 @@ onBeforeUnmount(() => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.2s ease-out;
   border: 1px solid var(--border-color, transparent);
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 16px;
+    margin: 0;
+  }
+
+  .modal-large {
+    width: 95vw !important;
+    max-width: 95vw !important;
+  }
+
+  .color-presets {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .color-picker-container {
+    flex-wrap: wrap;
+  }
+
+  .color-input {
+    width: 48px;
+    height: 36px;
+  }
+
+  .manage-tags-content {
+    max-height: 60vh;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
 }
 
 .modal-large {
