@@ -1,6 +1,8 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from note.models import Note
+
 
 class Idea(models.Model):
     class Category(models.TextChoices):
@@ -35,12 +37,12 @@ class CheckList(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='checklists',
+        related_name="checklists",
         verbose_name="Пользователь",
         null=True,
-        blank=True
+        blank=True,
     )
-    
+
 
 class CheckListItem(models.Model):
     checklist = models.ForeignKey(

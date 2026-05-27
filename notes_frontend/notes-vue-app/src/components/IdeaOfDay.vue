@@ -13,14 +13,12 @@
         <span class="idea-label">Идея дня</span>
       </div>
       <div class="empty-content">
-        <p class="empty-message">
-          Модуль «Идея дня» работает от 20 заметок-кандидатов
-        </p>
+        <p class="empty-message">Модуль «Идея дня» работает от 20 заметок-кандидатов</p>
         <p class="empty-hint">
           Создайте заметки с отметкой 💡, чтобы увидеть здесь идею дня
-          <br>Сейчас кандидатов: {{ totalCandidates }}
+          <br />Сейчас кандидатов: {{ totalCandidates }}
         </p>
-        <button v-if="error" @click="retry" class="retry-link">Повторить</button>
+        <button v-if="error" class="retry-link" @click="retry">Повторить</button>
       </div>
     </div>
 
@@ -32,27 +30,27 @@
       </div>
 
       <div class="idea-content">
-      <div class="idea-title-row">
-        <h3 class="idea-title">{{ currentIdea.note.title }}</h3>
-      </div>
-      <!-- idea-preview УДАЛИТЬ отсюда -->
+        <div class="idea-title-row">
+          <h3 class="idea-title">{{ currentIdea.note.title }}</h3>
+        </div>
+        <!-- idea-preview УДАЛИТЬ отсюда -->
 
-      <div class="idea-footer">
-        <div v-if="currentIdea.note.tags?.length" class="idea-tags">
-          <span
-            v-for="tag in currentIdea.note.tags.slice(0, 3)"
-            :key="tag.id"
-            class="idea-tag"
-            :style="{ backgroundColor: tag.color + '20', color: tag.color }"
-          >
-            #{{ tag.name }}
-          </span>
-          <span v-if="currentIdea.note.tags.length > 3" class="more-tags">
-            +{{ currentIdea.note.tags.length - 3 }}
-          </span>
+        <div class="idea-footer">
+          <div v-if="currentIdea.note.tags?.length" class="idea-tags">
+            <span
+              v-for="tag in currentIdea.note.tags.slice(0, 3)"
+              :key="tag.id"
+              class="idea-tag"
+              :style="{ backgroundColor: tag.color + '20', color: tag.color }"
+            >
+              #{{ tag.name }}
+            </span>
+            <span v-if="currentIdea.note.tags.length > 3" class="more-tags">
+              +{{ currentIdea.note.tags.length - 3 }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -69,13 +67,6 @@ const currentIdea = computed(() => ideaStore.currentIdea)
 const loading = computed(() => ideaStore.loading)
 const error = computed(() => ideaStore.error)
 const totalCandidates = computed(() => ideaStore.totalCandidates)
-const shownCount = computed(() => ideaStore.shownCount)
-
-const getPreview = (content) => {
-  if (!content) return 'Нет содержания'
-  const plainText = content.replace(/<[^>]*>/g, '')
-  return plainText.length > 80 ? plainText.substring(0, 80) + '...' : plainText
-}
 
 const goToIdea = () => {
   if (currentIdea.value?.note?.id) {
@@ -138,7 +129,7 @@ onMounted(async () => {
   color: white;
   cursor: pointer;
   display: flex;
-  align-items: center;   /* иконка и текст на одной оси */
+  align-items: center; /* иконка и текст на одной оси */
   gap: 10px;
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
@@ -182,7 +173,7 @@ onMounted(async () => {
 
 .idea-badge {
   display: flex;
-  flex-direction: row;   /* иконка + подпись в строку */
+  flex-direction: row; /* иконка + подпись в строку */
   align-items: center;
   gap: 6px;
   padding: 6px 10px;

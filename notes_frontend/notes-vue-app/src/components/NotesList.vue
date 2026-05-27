@@ -3,11 +3,9 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useNoteListStore } from '../stores/notelist'
 import { useFileStore } from '../stores/files'
 import IdeaOfDay from '../components/IdeaOfDay.vue'
-import { useTagStore } from '../stores/tags' 
 
 const noteListStore = useNoteListStore()
 const fileStore = useFileStore()
-const tagStore = useTagStore()
 
 // Локальное состояние
 const isDeleting = ref(false)
@@ -34,16 +32,6 @@ const checkFilesForNotes = async () => {
     } catch (err) {
       console.error(`Ошибка проверки файлов для заметки ${note.id}:`, err)
     }
-  }
-}
-
-// После создания тега — обновляем список
-const handleCreateTag = async (tagData) => {
-  try {
-    await tagStore.createTag(tagData)
-    await tagStore.fetchTags()   // <-- ключевая строка, принудительное обновление
-  } catch (err) {
-    console.error('Ошибка создания тега:', err)
   }
 }
 
@@ -102,7 +90,6 @@ const getTruncatedTitle = (title) => {
   if (!title) return 'Без названия'
   return title.length > 20 ? title.substring(0, 20) + '...' : title
 }
-
 </script>
 
 <template>
@@ -308,9 +295,7 @@ const getTruncatedTitle = (title) => {
       <div class="onboarding-steps">
         <div class="onboarding-step">
           <span class="step-num">1</span>
-          <router-link to="/create" class="step-link">
-            Создайте первую идею →
-          </router-link>
+          <router-link to="/create" class="step-link"> Создайте первую идею → </router-link>
         </div>
         <div class="onboarding-step">
           <span class="step-num">2</span>
@@ -322,11 +307,8 @@ const getTruncatedTitle = (title) => {
         </div>
       </div>
 
-      <router-link to="/create" class="create-first-btn">
-        + Создать первую идею
-      </router-link>
+      <router-link to="/create" class="create-first-btn"> + Создать первую идею </router-link>
     </div>
-
 
     <!-- Сетка заметок -->
     <div v-else class="notes-container">
@@ -454,7 +436,6 @@ const getTruncatedTitle = (title) => {
 </template>
 
 <style scoped>
-
 .onboarding-steps {
   display: flex;
   flex-direction: column;
@@ -512,7 +493,6 @@ const getTruncatedTitle = (title) => {
 .create-first-btn:hover {
   background: #b794d4;
 }
-
 
 .notes-list-page {
   min-height: 100vh;
@@ -657,8 +637,12 @@ const getTruncatedTitle = (title) => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-state {
@@ -861,8 +845,8 @@ const getTruncatedTitle = (title) => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 400px;        /* ограничение высоты */
-  overflow-y: auto;          /* скролл при переполнении */
+  max-height: 400px; /* ограничение высоты */
+  overflow-y: auto; /* скролл при переполнении */
   scrollbar-width: thin;
   scrollbar-color: #c9a9e8 transparent;
 }
@@ -875,7 +859,6 @@ const getTruncatedTitle = (title) => {
   background: #c9a9e8;
   border-radius: 2px;
 }
-
 
 .note-footer {
   display: flex;
@@ -903,8 +886,8 @@ const getTruncatedTitle = (title) => {
 .popular-tags-list {
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;          /* не переносим */
-  overflow-x: auto;           /* горизонтальный скролл */
+  flex-wrap: nowrap; /* не переносим */
+  overflow-x: auto; /* горизонтальный скролл */
   padding-bottom: 6px;
   scrollbar-width: thin;
   scrollbar-color: #c9a9e8 transparent;

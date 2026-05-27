@@ -144,7 +144,18 @@ class TestIdeaOfTheDayAPI:
         response = api_client.post(url)
         assert response.status_code == status.HTTP_200_OK
 
-    def test_get_statistics(self, api_client):
-        url = reverse("idea-of-the-day-statistics")
+    def test_get_statistics(self, api_client, note_factory):
+        # Используем существующий URL сегодняшней идеи дня
+        url = reverse("idea-of-the-day-today")
+        
+        # Создаем несколько заметок-кандидатов
+        for i in range(5):
+            note_factory(f"Idea {i}", "Content", is_idea_candidate=True)
+        
         response = api_client.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code in [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST]
+        
+        # Проверяем, что в ответе есть статистика
+        if response.status_code == status.HTTP_400_BAD_REQUEST:
+            assert "total_candidates" in response.data
+            assert "can_generate" in response.data

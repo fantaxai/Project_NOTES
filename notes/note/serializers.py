@@ -54,12 +54,14 @@ class NoteCreateUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {"title": {"required": False}, "content": {"required": False}}
 
     def validate_tag_ids(self, value):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request and request.user.is_authenticated:
             user_tags = Tag.objects.filter(user=request.user)
             for tag in value:
                 if tag not in user_tags:
-                    raise serializers.ValidationError(f"Тег {tag.name} не принадлежит текущему пользователю")
+                    raise serializers.ValidationError(
+                        f"Тег {tag.name} не принадлежит текущему пользователю"
+                    )
         return value
 
     def create(self, validated_data):
@@ -90,14 +92,21 @@ class IdeaOfTheDaySerializer(serializers.ModelSerializer):
     class Meta:
         model = IdeaOfTheDay
         fields = [
-            "id", "note", "note_id", "date", "shown", 
-            "total_candidates", "shown_ids", "shown_count", "user_id"
+            "id",
+            "note",
+            "note_id",
+            "date",
+            "shown",
+            "total_candidates",
+            "shown_ids",
+            "shown_count",
+            "user_id",
         ]
         read_only_fields = ["id", "date", "user_id"]
 
     def get_user_id_from_obj(self, obj):
         """Получает user_id из объекта"""
-        if hasattr(obj, 'user_id') and obj.user_id:
+        if hasattr(obj, "user_id") and obj.user_id:
             return obj.user_id
         return None
 

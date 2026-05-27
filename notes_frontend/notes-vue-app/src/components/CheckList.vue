@@ -274,7 +274,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto;   /* <-- вот это ключевое */
+  overflow-y: auto; /* <-- вот это ключевое */
   flex: 1;
   min-height: 0;
 }
@@ -349,7 +349,7 @@ onMounted(() => {
   background: var(--hover-bg, #e9ecef);
 }
 
-.category-checkbox input[type="checkbox"] {
+.category-checkbox input[type='checkbox'] {
   width: 18px;
   height: 18px;
   accent-color: var(--primary-color, #c9a9e8);
@@ -515,7 +515,7 @@ onMounted(() => {
 /* Адаптивность для мобильных устройств */
 @media (max-width: 600px) {
   .modal-overlay {
-    align-items: flex-end;   /* модалка снизу на мобиле */
+    align-items: flex-end; /* модалка снизу на мобиле */
     padding: 0;
   }
 
@@ -530,7 +530,7 @@ onMounted(() => {
   }
 
   .categories-grid {
-    grid-template-columns: 1fr 1fr;  /* 2 колонки на мобиле */
+    grid-template-columns: 1fr 1fr; /* 2 колонки на мобиле */
     gap: 6px;
   }
 
@@ -543,7 +543,7 @@ onMounted(() => {
     gap: 6px;
   }
 
-   .mode-option {
+  .mode-option {
     padding: 10px;
     gap: 8px;
   }

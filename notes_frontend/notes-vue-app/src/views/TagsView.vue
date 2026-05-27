@@ -412,7 +412,7 @@ onMounted(() => {
   .tags-sidebar {
     width: 100%;
   }
-  
+
   .tag-list-wrapper :deep(.tag-list) {
     max-height: 400px;
   }
@@ -468,7 +468,7 @@ onMounted(() => {
   .tags-sidebar {
     width: 100%;
   }
-  
+
   .tag-list-wrapper :deep(.tag-list) {
     max-height: 350px;
   }
@@ -532,5 +532,4 @@ onMounted(() => {
     font-size: 11px;
   }
 }
-
 </style>

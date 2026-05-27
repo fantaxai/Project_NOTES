@@ -6,7 +6,7 @@ const routes = [
     path: '/auth',
     name: 'Auth',
     component: () => import('../views/AuthPage.vue'),
-    meta: { guest: true }
+    meta: { guest: true },
   },
   {
     path: '/',
@@ -16,44 +16,43 @@ const routes = [
     path: '/notes',
     name: 'notes',
     component: () => import('../views/NotelistView.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/create',
     name: 'create',
     component: () => import('../views/CreateNoteView.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/note/:id',
     name: 'note',
     component: () => import('../views/NoteView.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 // ===== НАСТРОЙКА МЕТРИКИ ДЛЯ SPA =====
 router.afterEach((to) => {
-  if (typeof ym !== 'undefined') {
-    ym(109251310, 'hit', to.fullPath);
+  if (typeof window !== 'undefined' && window.ym) {
+    window.ym(109251310, 'hit', to.fullPath)
   }
 })
 // =====================================
 
-
 // Защита маршрутов
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // Ждём проверки авторизации если ещё не проверена
   if (!authStore.isAuthChecked) {
     await authStore.checkAuth()
   }
-  
+
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/auth')
   } else if (to.meta.guest && authStore.isAuthenticated) {

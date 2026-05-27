@@ -5,95 +5,77 @@
         <h1>📝 Копилка идей</h1>
         <p>Сохраняйте и организуйте ваши идеи</p>
       </div>
-      
+
       <div class="auth-tabs">
-        <button 
-          :class="{ active: activeTab === 'login' }"
-          @click="switchTab('login')"
-        >
-          Вход
-        </button>
-        <button 
-          :class="{ active: activeTab === 'register' }"
-          @click="switchTab('register')"
-        >
+        <button :class="{ active: activeTab === 'login' }" @click="switchTab('login')">Вход</button>
+        <button :class="{ active: activeTab === 'register' }" @click="switchTab('register')">
           Регистрация
         </button>
       </div>
-      
+
       <!-- Форма входа -->
-      <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="auth-form">
+      <form v-if="activeTab === 'login'" class="auth-form" @submit.prevent="handleLogin">
         <div class="form-group">
           <label>Email</label>
-          <input 
-            v-model="loginForm.email" 
-            type="email" 
-            required 
-            placeholder="your@email.com"
-          />
+          <input v-model="loginForm.email" type="email" required placeholder="your@email.com" />
         </div>
-        
+
         <div class="form-group">
           <label>Пароль</label>
-          <input 
-            v-model="loginForm.password" 
-            type="password" 
-            required 
+          <input
+            v-model="loginForm.password"
+            type="password"
+            required
             placeholder="Введите пароль"
           />
         </div>
-        
+
         <div v-if="error" class="error-message">{{ error }}</div>
-        
+
         <button type="submit" class="submit-btn" :disabled="loading">
           {{ loading ? 'Вход...' : 'Войти' }}
         </button>
       </form>
-      
+
       <!-- Форма регистрации -->
-      <form v-else @submit.prevent="handleRegister" class="auth-form">
+      <form v-else class="auth-form" @submit.prevent="handleRegister">
         <div class="form-group">
           <label>Имя пользователя</label>
-          <input 
-            v-model="registerForm.username" 
-            type="text" 
-            required 
+          <input
+            v-model="registerForm.username"
+            type="text"
+            required
             placeholder="Придумайте имя"
           />
         </div>
-        
+
         <div class="form-group">
           <label>Email</label>
-          <input 
-            v-model="registerForm.email" 
-            type="email" 
-            required 
-            placeholder="your@email.com"
-          />
+          <input v-model="registerForm.email" type="email" required placeholder="your@email.com" />
         </div>
-        
+
         <div class="form-group">
           <label>Пароль</label>
-          <input 
-            v-model="registerForm.password" 
-            type="password" 
-            required 
+          <input
+            v-model="registerForm.password"
+            type="password"
+            required
             placeholder="Минимум 8 символов"
           />
         </div>
-        
+
         <div class="form-group">
           <label>Подтвердите пароль</label>
-          <input 
-            v-model="registerForm.password2" 
-            type="password" 
-            required 
+          <input
+            v-model="registerForm.password2"
+            type="password"
+            required
             placeholder="Повторите пароль"
           />
         </div>
-        
+
         <div v-if="error" class="error-message">{{ error }}</div>
-        
+
         <button type="submit" class="submit-btn" :disabled="loading">
           {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
         </button>
@@ -116,14 +98,14 @@ const error = ref('')
 
 const loginForm = reactive({
   email: '',
-  password: ''
+  password: '',
 })
 
 const registerForm = reactive({
   username: '',
   email: '',
   password: '',
-  password2: ''
+  password2: '',
 })
 
 function switchTab(tab) {
@@ -134,12 +116,12 @@ function switchTab(tab) {
 async function handleLogin() {
   error.value = ''
   loading.value = true
-  
+
   try {
     console.log('Отправка входа:', loginForm.email)
     const result = await authStore.login(loginForm.email, loginForm.password)
     console.log('Результат входа:', result)
-    
+
     if (result.success) {
       router.push('/')
     } else {
@@ -156,19 +138,19 @@ async function handleLogin() {
 
 async function handleRegister() {
   error.value = ''
-  
+
   if (registerForm.password !== registerForm.password2) {
     error.value = 'Пароли не совпадают'
     return
   }
-  
+
   if (registerForm.password.length < 8) {
     error.value = 'Пароль должен быть не менее 8 символов'
     return
   }
-  
+
   loading.value = true
-  
+
   try {
     console.log('Отправка регистрации:', registerForm.email)
     const result = await authStore.register(
@@ -177,15 +159,16 @@ async function handleRegister() {
       registerForm.password,
       registerForm.password2
     )
-    
+
     console.log('Результат регистрации:', result)
-    
+
     if (result.success) {
       router.push('/')
     } else {
-      error.value = typeof result.error === 'object' 
-        ? Object.values(result.error).flat().join(', ')
-        : result.error
+      error.value =
+        typeof result.error === 'object'
+          ? Object.values(result.error).flat().join(', ')
+          : result.error
       console.error('Ошибка регистрации:', result.error)
     }
   } catch (err) {

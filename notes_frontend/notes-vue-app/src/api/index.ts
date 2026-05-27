@@ -22,27 +22,27 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
-    
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      
+
       try {
         const refreshToken = localStorage.getItem('refresh_token')
         if (refreshToken) {
           const response = await axios.post('/api/auth/token/refresh/', {
-            refresh: refreshToken
+            refresh: refreshToken,
           })
-          
+
           const newAccess = response.data.access
           localStorage.setItem('access_token', newAccess)
-          
+
           // Обновляем токен в заголовке
           originalRequest.headers = originalRequest.headers || {}
           originalRequest.headers.Authorization = `Bearer ${newAccess}`
-          
+
           // Обновляем также в глобальных настройках экземпляра
           api.defaults.headers.common.Authorization = `Bearer ${newAccess}`
-          
+
           return api(originalRequest)
         }
       } catch (refreshError) {
@@ -53,7 +53,7 @@ api.interceptors.response.use(
         return Promise.reject(refreshError)
       }
     }
-    
+
     return Promise.reject(error)
   }
 )

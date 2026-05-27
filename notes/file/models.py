@@ -18,7 +18,7 @@ class File(models.Model):
         "note.Note", on_delete=models.CASCADE, verbose_name="Заметка", related_name="files"
     )
     creation_date = models.DateField(auto_now_add=True, verbose_name="Дата создания")
-    file = models.FileField(upload_to='note_files/', null=True, blank=True, verbose_name="Файл")
+    file = models.FileField(upload_to="note_files/", null=True, blank=True, verbose_name="Файл")
 
     def __str__(self):
         return self.name

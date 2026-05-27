@@ -372,7 +372,7 @@ onMounted(async () => {
 /* Обертка для прокрутки пунктов */
 .checklist-items-wrapper {
   flex: 1;
-  overflow-y: auto;           /* вертикальный скролл списка */
+  overflow-y: auto; /* вертикальный скролл списка */
   min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: #c9a9e8 transparent;
@@ -765,25 +765,25 @@ onMounted(async () => {
   .checklist-empty {
     padding: 12px 8px;
   }
-  
+
   .empty-icon {
     font-size: 24px;
   }
-  
+
   .empty-title {
     font-size: 13px;
   }
-  
+
   .empty-hint {
     font-size: 10px;
   }
-  
+
   .modal-list {
     width: 90%;
     max-width: 400px;
     margin: 0 16px;
   }
-  
+
   .modal-preview {
     width: 95%;
     max-width: 500px;
@@ -796,16 +796,16 @@ onMounted(async () => {
   .checklist-empty {
     padding: 12px 8px;
   }
-  
+
   .empty-icon {
     font-size: 24px;
     margin-bottom: 6px;
   }
-  
+
   .empty-text {
     font-size: 12px;
   }
-  
+
   .empty-hint {
     font-size: 10px;
   }

@@ -22,13 +22,7 @@
 
       <div class="nav-right">
         <!-- Кнопка помощи / тур -->
-        <button
-          class="help-btn"
-          title="Показать обучающий тур"
-          @click="startTour"
-        >
-          ?
-        </button>
+        <button class="help-btn" title="Показать обучающий тур" @click="startTour">?</button>
 
         <div class="user-info">
           <div class="user-avatar">
@@ -72,8 +66,12 @@ const totalCount = computed(() => noteListStore.totalCount)
 
 const emit = defineEmits(['start-tour'])
 
-const openSettings = () => { showSettings.value = true }
-const generateChecklist = () => { showCheckList.value = true }
+const openSettings = () => {
+  showSettings.value = true
+}
+const generateChecklist = () => {
+  showCheckList.value = true
+}
 
 // Запускаем тур — эмитим событие наверх в App.vue
 const startTour = () => {
@@ -124,7 +122,9 @@ const handleGenerateChecklist = async (config) => {
   text-decoration: none;
   white-space: nowrap;
 }
-.nav-brand:hover { opacity: 0.8; }
+.nav-brand:hover {
+  opacity: 0.8;
+}
 
 .nav-center {
   display: flex;
@@ -171,7 +171,7 @@ const handleGenerateChecklist = async (config) => {
 }
 
 .nav-link.active .nav-count {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .btn-icon {
@@ -257,7 +257,9 @@ const handleGenerateChecklist = async (config) => {
   transition: all 0.2s;
   white-space: nowrap;
 }
-.logout-btn:hover { background: var(--danger-bg, #fee); }
+.logout-btn:hover {
+  background: var(--danger-bg, #fee);
+}
 
 .settings-btn {
   background: none;
@@ -272,7 +274,9 @@ const handleGenerateChecklist = async (config) => {
   justify-content: center;
   color: var(--text-primary, #333);
 }
-.settings-btn:hover { background: var(--hover-bg, #f5f5f5); }
+.settings-btn:hover {
+  background: var(--hover-bg, #f5f5f5);
+}
 
 @media (max-width: 768px) {
   .nav-container {
@@ -292,8 +296,16 @@ const handleGenerateChecklist = async (config) => {
     min-width: 90px;
     justify-content: center;
   }
-  .user-info { padding: 4px 6px; }
-  .user-name { display: none; }
-  .help-btn { width: 28px; height: 28px; font-size: 13px; }
+  .user-info {
+    padding: 4px 6px;
+  }
+  .user-name {
+    display: none;
+  }
+  .help-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
 }
 </style>
