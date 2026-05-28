@@ -8,7 +8,7 @@
         class="tour-spotlight"
         :style="spotlightStyle"
       ></div>
- 
+
       <!-- Карточка подсказки -->
       <div
         class="tour-card"
@@ -25,14 +25,14 @@
             @click="goToStep(i - 1)"
           ></div>
         </div>
- 
+
         <!-- Иконка шага -->
         <div class="tour-step-icon">{{ steps[currentStep].icon }}</div>
- 
+
         <!-- Текст -->
         <h3 class="tour-title">{{ steps[currentStep].title }}</h3>
         <p class="tour-text">{{ steps[currentStep].text }}</p>
- 
+
         <!-- Кнопки -->
         <div class="tour-actions">
           <button class="tour-skip" @click="skipTour">Пропустить</button>
@@ -46,37 +46,37 @@
               class="tour-btn tour-btn-next"
               @click="nextStep"
             >
-              {{ currentStep === steps.length - 1 ? '🎉 Готово!' : 'Далее →' }}
+              {{ currentStep === steps.length - 1 ? 'Готово' : 'Далее →' }}
             </button>
           </div>
         </div>
- 
+
         <!-- Счётчик -->
         <div class="tour-counter">{{ currentStep + 1 }} / {{ steps.length }}</div>
       </div>
     </div>
   </Teleport>
 </template>
- 
+
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
- 
+
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false,
   },
 })
- 
+
 const emit = defineEmits(['update:modelValue', 'complete'])
- 
+
 const STORAGE_KEY = 'tour_completed'
- 
+
 const isVisible = ref(false)
 const currentStep = ref(0)
 const spotlightRect = ref(null)
 const windowSize = ref({ w: window.innerWidth, h: window.innerHeight })
- 
+
 // Шаги тура — selector указывает на DOM-элемент для подсветки
 const steps = [
   {
@@ -122,7 +122,7 @@ const steps = [
     position: 'center',
   },
 ]
- 
+
 // Вычисляем стиль spotlight
 const spotlightStyle = computed(() => {
   if (!spotlightRect.value) return null
@@ -135,10 +135,17 @@ const spotlightStyle = computed(() => {
     height: `${height + pad * 2}px`,
   }
 })
- 
+
 // Вычисляем позицию карточки относительно подсвеченного элемента
 const cardStyle = computed(() => {
   const step = steps[currentStep.value]
+  const isMobile = windowSize.value.w <= 480
+
+  // На мобиле всегда снизу по центру — CSS переопределит позицию
+  if (isMobile) {
+    return { position: 'fixed' }
+  }
+
   if (!spotlightRect.value || step.position === 'center') {
     return {
       position: 'fixed',
@@ -147,19 +154,18 @@ const cardStyle = computed(() => {
       transform: 'translate(-50%, -50%)',
     }
   }
- 
+
   const { top, left, width, height } = spotlightRect.value
   const cardW = 320
   const cardH = 260
   const pad = 20
   const { w, h } = windowSize.value
- 
+
   let style = { position: 'fixed', width: cardW + 'px' }
- 
+
   if (step.position === 'bottom') {
     let t = top + height + pad + 10
     let l = left + width / 2 - cardW / 2
-    // Не выходим за края
     l = Math.max(16, Math.min(l, w - cardW - 16))
     if (t + cardH > h - 16) t = top - cardH - pad
     style.top = `${t}px`
@@ -179,10 +185,10 @@ const cardStyle = computed(() => {
     style.left = `${l}px`
     style.top = `${t}px`
   }
- 
+
   return style
 })
- 
+
 // Находим DOM-элемент и считаем его координаты
 const updateSpotlight = async () => {
   await nextTick()
@@ -206,18 +212,18 @@ const updateSpotlight = async () => {
   // Скроллим к элементу если нужно
   el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
- 
+
 const onResize = () => {
   windowSize.value = { w: window.innerWidth, h: window.innerHeight }
   updateSpotlight()
 }
- 
+
 const goToStep = (index) => {
   if (index < 0 || index >= steps.length) return
   currentStep.value = index
   updateSpotlight()
 }
- 
+
 const nextStep = () => {
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
@@ -226,18 +232,18 @@ const nextStep = () => {
     completeTour()
   }
 }
- 
+
 const prevStep = () => {
   if (currentStep.value > 0) {
     currentStep.value--
     updateSpotlight()
   }
 }
- 
+
 const skipTour = () => {
   completeTour()
 }
- 
+
 const completeTour = () => {
   localStorage.setItem(STORAGE_KEY, 'true')
   isVisible.value = false
@@ -246,7 +252,7 @@ const completeTour = () => {
   emit('update:modelValue', false)
   emit('complete')
 }
- 
+
 // Запуск тура
 const startTour = async () => {
   currentStep.value = 0
@@ -254,13 +260,13 @@ const startTour = async () => {
   await nextTick()
   updateSpotlight()
 }
- 
+
 // Следим за пропом
 watch(() => props.modelValue, (val) => {
   if (val) startTour()
   else if (isVisible.value) completeTour()
 })
- 
+
 // Первый запуск — если тур не пройден
 onMounted(() => {
   window.addEventListener('resize', onResize)
@@ -268,14 +274,14 @@ onMounted(() => {
     startTour()
   }
 })
- 
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize)
 })
- 
+
 defineExpose({ startTour })
 </script>
- 
+
 <style scoped>
 /* Затемнённый оверлей */
 .tour-overlay {
@@ -286,7 +292,7 @@ defineExpose({ startTour })
   /* Затемнение через box-shadow на spotlight */
   background: transparent;
 }
- 
+
 /* Псевдо-spotlight: элемент с box-shadow создаёт "дырку" */
 .tour-spotlight {
   position: fixed;
@@ -299,12 +305,12 @@ defineExpose({ startTour })
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   animation: pulse-border 2s ease-in-out infinite;
 }
- 
+
 @keyframes pulse-border {
   0%, 100% { box-shadow: 0 0 0 4px rgba(201, 169, 232, 0.6), 0 0 0 9999px rgba(0, 0, 0, 0.55); }
   50%       { box-shadow: 0 0 0 7px rgba(201, 169, 232, 0.9), 0 0 0 9999px rgba(0, 0, 0, 0.55); }
 }
- 
+
 /* Карточка тура */
 .tour-card {
   position: fixed;
@@ -318,12 +324,12 @@ defineExpose({ startTour })
   z-index: 10001;
   animation: card-appear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
- 
+
 @keyframes card-appear {
   from { opacity: 0; transform: scale(0.85) translateY(8px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
- 
+
 /* Прогресс-точки */
 .tour-progress {
   display: flex;
@@ -331,7 +337,7 @@ defineExpose({ startTour })
   margin-bottom: 16px;
   justify-content: center;
 }
- 
+
 .tour-dot {
   width: 8px;
   height: 8px;
@@ -341,23 +347,23 @@ defineExpose({ startTour })
   transition: all 0.2s;
   flex-shrink: 0;
 }
- 
+
 .tour-dot.active {
   background: var(--primary-color, #c9a9e8);
   width: 24px;
   border-radius: 4px;
 }
- 
+
 .tour-dot.done {
   background: var(--primary-color, #c9a9e8);
   opacity: 0.5;
 }
- 
+
 .tour-dot:hover {
   opacity: 1 !important;
   background: var(--primary-color, #c9a9e8);
 }
- 
+
 /* Иконка */
 .tour-step-icon {
   font-size: 36px;
@@ -365,7 +371,7 @@ defineExpose({ startTour })
   margin-bottom: 10px;
   line-height: 1;
 }
- 
+
 /* Заголовок */
 .tour-title {
   margin: 0 0 8px 0;
@@ -375,7 +381,7 @@ defineExpose({ startTour })
   text-align: center;
   line-height: 1.3;
 }
- 
+
 /* Описание */
 .tour-text {
   margin: 0 0 20px 0;
@@ -384,7 +390,7 @@ defineExpose({ startTour })
   color: var(--text-secondary, #666);
   text-align: center;
 }
- 
+
 /* Кнопки */
 .tour-actions {
   display: flex;
@@ -392,7 +398,7 @@ defineExpose({ startTour })
   align-items: center;
   gap: 8px;
 }
- 
+
 .tour-skip {
   background: none;
   border: none;
@@ -404,17 +410,17 @@ defineExpose({ startTour })
   transition: all 0.2s;
   white-space: nowrap;
 }
- 
+
 .tour-skip:hover {
   color: var(--text-secondary, #666);
   background: var(--hover-bg, #f5f5f5);
 }
- 
+
 .tour-nav {
   display: flex;
   gap: 8px;
 }
- 
+
 .tour-btn {
   padding: 8px 16px;
   border-radius: 10px;
@@ -425,27 +431,27 @@ defineExpose({ startTour })
   transition: all 0.2s;
   white-space: nowrap;
 }
- 
+
 .tour-btn-prev {
   background: var(--bg-secondary, #f5f5f5);
   color: var(--text-secondary, #666);
 }
- 
+
 .tour-btn-prev:hover {
   background: var(--border-color, #e0e0e0);
 }
- 
+
 .tour-btn-next {
   background: var(--primary-color, #c9a9e8);
   color: white;
 }
- 
+
 .tour-btn-next:hover {
   background: var(--primary-hover, #b794d4);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(201, 169, 232, 0.4);
 }
- 
+
 /* Счётчик */
 .tour-counter {
   text-align: center;
@@ -454,7 +460,7 @@ defineExpose({ startTour })
   margin-top: 12px;
   letter-spacing: 0.5px;
 }
- 
+
 /* Мобильная адаптация */
 @media (max-width: 480px) {
   .tour-card {

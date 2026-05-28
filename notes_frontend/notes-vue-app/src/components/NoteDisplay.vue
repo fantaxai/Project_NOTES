@@ -158,91 +158,130 @@ const exportToTxt = () => {
   showExportMenu.value = false
 }
 
-// ── PDF: сохраняется сразу как файл через html2pdf-подход через iframe ──
-const exportToPdf = () => {
+// ── PDF: генерируем через jsPDF + html2canvas, файл скачивается сразу ──
+const isPdfExporting = ref(false)
+
+const exportToPdf = async () => {
   const note = props.note
-  if (!note) return
+  if (!note || isPdfExporting.value) return
 
-  const tagsHtml = note.tags?.length
-    ? note.tags.map(t => `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;background:${t.color}20;color:${t.color};border:1px solid ${t.color};margin:2px 3px 2px 0">#${t.name}</span>`).join('')
-    : ''
-
-  const contentHtml = (note.content || '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>')
-
-  const files = fileStore.currentNoteFiles
-  const filesHtml = files?.length
-    ? `<div class="files-section">
-        <div class="files-title">📎 Прикреплённые файлы</div>
-        ${files.map(f => `
-          <div class="file-row">
-            <span class="file-icon">${f.format === 'pdf' ? '📄' : f.format === 'txt' ? '📝' : '🖼️'}</span>
-            <span class="file-name">${f.name}</span>
-            <span class="file-meta">${f.format.toUpperCase()} · ${formatFileSize(f.size)}</span>
-            ${f.thumbnail ? `<img src="${f.thumbnail}" class="file-thumb" alt="${f.name}"/>` : ''}
-          </div>`).join('')}
-      </div>`
-    : ''
-
-  const html = `<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>${note.title || 'Заметка'}</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,sans-serif;color:#1a1a1a;background:white;padding:40px 48px;font-size:15px;line-height:1.7}
-    .header{border-bottom:2px solid #c9a9e8;padding-bottom:16px;margin-bottom:20px}
-    .title{font-size:26px;font-weight:700;line-height:1.3;margin-bottom:12px;word-break:break-word}
-    .tags{display:flex;flex-wrap:wrap;margin-bottom:10px}
-    .dates{font-size:12px;color:#999;display:flex;flex-wrap:wrap;gap:16px}
-    .content{font-size:15px;line-height:1.8;color:#333;word-break:break-word;margin-bottom:24px}
-    .files-section{border-top:1px solid #e0e0e0;padding-top:16px;margin-top:16px}
-    .files-title{font-size:14px;font-weight:600;color:#666;margin-bottom:12px}
-    .file-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0}
-    .file-icon{font-size:18px;flex-shrink:0}
-    .file-name{flex:1;font-size:14px;font-weight:500;color:#333;word-break:break-word}
-    .file-meta{font-size:12px;color:#999;white-space:nowrap}
-    .file-thumb{width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0}
-    @media print{body{padding:0}@page{margin:1.5cm;size:A4}}
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="title">${note.title || 'Без названия'}</div>
-    ${tagsHtml ? `<div class="tags">${tagsHtml}</div>` : ''}
-    <div class="dates">
-      ${note.creation_date ? `<span>Создано: ${formatDate(note.creation_date)}</span>` : ''}
-      ${note.last_change_date ? `<span>Изменено: ${formatDate(note.last_change_date)}</span>` : ''}
-    </div>
-  </div>
-  <div class="content">${contentHtml}</div>
-  ${filesHtml}
-  <script>
-    window.onload = function() {
-      window.print()
-      // После печати закрываем вкладку
-      window.onfocus = function() { setTimeout(function(){ window.close() }, 500) }
-    }
-  <\/script>
-</body>
-</html>`
-
-  // Открываем в новой вкладке — браузер покажет диалог "Сохранить как PDF"
-  // Это единственный надёжный способ получить PDF с кириллицей без библиотек
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const win = window.open(url, '_blank')
-  if (!win) {
-    // Если попапы заблокированы — скачиваем как HTML
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${note.title || 'заметка'}.html`
-    link.click()
-  }
-  setTimeout(() => URL.revokeObjectURL(url), 10000)
+  isPdfExporting.value = true
   showExportMenu.value = false
+
+  try {
+    // Динамически загружаем библиотеки только при первом вызове
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+      import('jspdf'),
+      import('html2canvas'),
+    ])
+
+    // Создаём временный div с контентом заметки
+    const container = document.createElement('div')
+    container.style.cssText = `
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 794px;
+      background: white;
+      font-family: Arial, sans-serif;
+      color: #1a1a1a;
+      padding: 48px;
+      font-size: 15px;
+      line-height: 1.7;
+      box-sizing: border-box;
+    `
+
+    // Теги
+    const tagsHtml = note.tags?.length
+      ? note.tags.map(t =>
+          `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;
+           font-weight:500;background:${t.color}20;color:${t.color};border:1px solid ${t.color};
+           margin:2px 3px 2px 0">#${t.name}</span>`
+        ).join('')
+      : ''
+
+    // Контент (экранируем HTML, переводим переносы)
+    const contentSafe = (note.content || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>')
+
+    // Файлы
+    const files = fileStore.currentNoteFiles
+    const filesHtml = files?.length
+      ? `<div style="border-top:1px solid #e0e0e0;padding-top:16px;margin-top:24px">
+          <div style="font-size:14px;font-weight:600;color:#666;margin-bottom:12px">Прикреплённые файлы</div>
+          ${files.map(f => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0">
+              <span style="font-size:16px">${f.format === 'pdf' ? '📄' : f.format === 'txt' ? '📝' : '🖼️'}</span>
+              <span style="flex:1;font-size:14px;font-weight:500;color:#333">${f.name}</span>
+              <span style="font-size:12px;color:#999">${f.format.toUpperCase()} · ${formatFileSize(f.size)}</span>
+            </div>`).join('')}
+        </div>`
+      : ''
+
+    container.innerHTML = `
+      <div style="border-bottom:2px solid #c9a9e8;padding-bottom:16px;margin-bottom:20px">
+        <div style="font-size:26px;font-weight:700;line-height:1.3;margin-bottom:12px;word-break:break-word">
+          ${note.title || 'Без названия'}
+        </div>
+        ${tagsHtml ? `<div style="display:flex;flex-wrap:wrap;margin-bottom:10px">${tagsHtml}</div>` : ''}
+        <div style="font-size:12px;color:#999;display:flex;gap:16px;flex-wrap:wrap">
+          ${note.creation_date ? `<span>Создано: ${formatDate(note.creation_date)}</span>` : ''}
+          ${note.last_change_date ? `<span>Изменено: ${formatDate(note.last_change_date)}</span>` : ''}
+        </div>
+      </div>
+      <div style="font-size:15px;line-height:1.8;color:#333;word-break:break-word;margin-bottom:24px">
+        ${contentSafe}
+      </div>
+      ${filesHtml}
+    `
+
+    document.body.appendChild(container)
+
+    // Рендерим в canvas
+    const canvas = await html2canvas(container, {
+      scale: 2,          // Высокое разрешение
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    })
+
+    document.body.removeChild(container)
+
+    // A4 в мм: 210 × 297
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pageW = pdf.internal.pageSize.getWidth()
+    const pageH = pdf.internal.pageSize.getHeight()
+    const margin = 0
+
+    const imgW = pageW - margin * 2
+    const imgH = (canvas.height * imgW) / canvas.width
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95)
+
+    // Если контент длиннее одной страницы — нарезаем
+    if (imgH <= pageH) {
+      pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH)
+    } else {
+      let y = 0
+      while (y < imgH) {
+        if (y > 0) pdf.addPage()
+        pdf.addImage(imgData, 'JPEG', margin, -(y), imgW, imgH)
+        y += pageH
+      }
+    }
+
+    const filename = `${(note.title || 'заметка').replace(/[\\/:*?"<>|]/g, '_')}.pdf`
+    pdf.save(filename)
+
+  } catch (err) {
+    console.error('Ошибка экспорта PDF:', err)
+    alert('Не удалось создать PDF. Попробуйте ещё раз.')
+  } finally {
+    isPdfExporting.value = false
+  }
 }
 
 const escapeHtml = (text) => {
@@ -280,8 +319,9 @@ const escapeHtml = (text) => {
               <button class="export-option" @click="exportToTxt">
                 <span class="export-icon">📄</span>Сохранить как TXT
               </button>
-              <button class="export-option" @click="exportToPdf">
-                <span class="export-icon">📑</span>Сохранить как PDF
+              <button class="export-option" :disabled="isPdfExporting" @click="exportToPdf">
+                <span class="export-icon">{{ isPdfExporting ? '⏳' : '📑' }}</span>
+                {{ isPdfExporting ? 'Создаём PDF...' : 'Сохранить как PDF' }}
               </button>
             </div>
           </div>
