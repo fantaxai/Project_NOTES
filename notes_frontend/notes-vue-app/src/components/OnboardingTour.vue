@@ -8,13 +8,9 @@
         class="tour-spotlight"
         :style="spotlightStyle"
       ></div>
-
+ 
       <!-- Карточка подсказки -->
-      <div
-        class="tour-card"
-        :style="cardStyle"
-        @click.stop
-      >
+      <div class="tour-card" :style="cardStyle" @click.stop>
         <!-- Прогресс -->
         <div class="tour-progress">
           <div
@@ -46,7 +42,7 @@
               class="tour-btn tour-btn-next"
               @click="nextStep"
             >
-              {{ currentStep === steps.length - 1 ? 'Готово' : 'Далее →' }}
+              {{ currentStep === steps.length - 1 ? '🎉 Готово!' : 'Далее →' }}
             </button>
           </div>
         </div>
@@ -266,7 +262,7 @@ watch(() => props.modelValue, (val) => {
   if (val) startTour()
   else if (isVisible.value) completeTour()
 })
-
+ 
 // Первый запуск — если тур не пройден
 onMounted(() => {
   window.addEventListener('resize', onResize)
@@ -307,8 +303,17 @@ defineExpose({ startTour })
 }
 
 @keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(201, 169, 232, 0.6), 0 0 0 9999px rgba(0, 0, 0, 0.55); }
-  50%       { box-shadow: 0 0 0 7px rgba(201, 169, 232, 0.9), 0 0 0 9999px rgba(0, 0, 0, 0.55); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(201, 169, 232, 0.6),
+      0 0 0 9999px rgba(0, 0, 0, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 0 7px rgba(201, 169, 232, 0.9),
+      0 0 0 9999px rgba(0, 0, 0, 0.55);
+  }
 }
 
 /* Карточка тура */
@@ -326,8 +331,14 @@ defineExpose({ startTour })
 }
 
 @keyframes card-appear {
-  from { opacity: 0; transform: scale(0.85) translateY(8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Прогресс-точки */

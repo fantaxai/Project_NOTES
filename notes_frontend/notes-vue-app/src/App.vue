@@ -5,19 +5,19 @@
     <OnboardingTour v-model="showTour" />
   </div>
 </template>
- 
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 import Navigation from './components/Navigation.vue'
 import OnboardingTour from './components/OnboardingTour.vue'
- 
+
 const authStore = useAuthStore()
 const showTour = ref(false)
- 
+
 onMounted(async () => {
   await authStore.checkAuth()
- 
+
   // Тема
   const savedTheme = localStorage.getItem('theme')
   const root = document.documentElement
@@ -34,14 +34,16 @@ onMounted(async () => {
     root.classList.add('light-theme')
     root.classList.remove('dark-theme')
   }
- 
+
   // Запустить тур автоматически при первом входе
   if (!localStorage.getItem('tour_completed') && authStore.isAuthenticated) {
-    setTimeout(() => { showTour.value = true }, 800)
+    setTimeout(() => {
+      showTour.value = true
+    }, 800)
   }
 })
 </script>
- 
+
 <style>
 :root,
 :root.light-theme {
@@ -66,7 +68,7 @@ onMounted(async () => {
   --success-bg: #e8f5e9;
   --modal-overlay: rgba(0, 0, 0, 0.5);
 }
- 
+
 :root.dark-theme {
   --primary-color: #b794d4;
   --primary-hover: #c9a9e8;
@@ -89,15 +91,25 @@ onMounted(async () => {
   --success-bg: #1e3a2a;
   --modal-overlay: rgba(0, 0, 0, 0.7);
 }
- 
-* { margin: 0; padding: 0; box-sizing: border-box; }
- 
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg-secondary);
   color: var(--text-primary);
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
- 
-#app { min-height: 100vh; background: var(--bg-secondary); }
+
+#app {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+}
 </style>

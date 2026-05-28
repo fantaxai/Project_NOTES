@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission
 
 from .models import IdeaOfTheDay, Note, Tag
 from .serializers import (
@@ -20,13 +20,14 @@ class AllowAnyOrAuthenticated(BasePermission):
     def has_permission(self, request, view):
         return True
 
+
 class TagViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TagSerializer
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user).order_by("-creation_date")
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -38,6 +39,7 @@ class TagViewSet(viewsets.ModelViewSet):
         serializer = NoteSerializer(notes, many=True)
         return Response(serializer.data)
 
+
 class NoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = NoteSerializer
@@ -46,11 +48,11 @@ class NoteViewSet(viewsets.ModelViewSet):
         if self.action in ["create", "update", "partial_update"]:
             return NoteCreateUpdateSerializer
         return NoteSerializer
-    
+
     def get_queryset(self):
         """Фильтруем заметки по пользователю"""
         return Note.objects.filter(user=self.request.user).order_by("-creation_date")
-    
+
     def perform_create(self, serializer):
         """Автоматически добавляем пользователя при создании заметки"""
         serializer.save(user=self.request.user)
@@ -64,7 +66,10 @@ class NoteViewSet(viewsets.ModelViewSet):
             note.tags.add(tag)
             return Response({"status": "tag added"})
         except Tag.DoesNotExist:
-            return Response({"error": "Tag not found or doesn't belong to user"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Tag not found or doesn't belong to user"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     @action(detail=True, methods=["post"])
     def remove_tag(self, request, pk=None):
@@ -75,8 +80,10 @@ class NoteViewSet(viewsets.ModelViewSet):
             note.tags.remove(tag)
             return Response({"status": "tag removed"})
         except Tag.DoesNotExist:
-            return Response({"error": "Tag not found or doesn't belong to user"}, 
-                          status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Tag not found or doesn't belong to user"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class IdeaOfTheDayViewSet(viewsets.GenericViewSet):
@@ -109,14 +116,16 @@ class IdeaOfTheDayViewSet(viewsets.GenericViewSet):
                     is_idea_candidate=True, shown_as_idea=True, user=request.user
                 ).values_list("id", flat=True)
             )
-            return Response({
-                "note": None,
-                "total_candidates": total,
-                "shown_ids": shown_ids,
-                "shown_count": len(shown_ids),
-                "can_generate": False,
-                "message": f"Модуль «Идея дня» работает от 20 заметок-кандидатов. Сейчас: {total}"
-            })
+            return Response(
+                {
+                    "note": None,
+                    "total_candidates": total,
+                    "shown_ids": shown_ids,
+                    "shown_count": len(shown_ids),
+                    "can_generate": False,
+                    "message": f"Модуль «Идея дня» работает от 20 заметок-кандидатов. Сейчас: {total}",
+                }
+            )
 
         # Генерируем новую идею
         candidates = Note.objects.filter(is_idea_candidate=True, user=request.user)

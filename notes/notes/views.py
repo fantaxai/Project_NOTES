@@ -37,10 +37,12 @@ class SettingsViewSet(viewsets.GenericViewSet):
         ).count()
         unshown_count = total_candidates - shown_count
 
-        return Response({
-            "total_candidates": total_candidates,
-            "shown_count": shown_count,
-            "unshown_count": unshown_count,
-            "can_generate": total_candidates >= 20,
-            "needs_reset": shown_count >= total_candidates and total_candidates >= 20,
-        })
+        return Response(
+            {
+                "total_candidates": total_candidates,
+                "shown_count": shown_count,
+                "unshown_count": unshown_count,
+                "can_generate": total_candidates >= 20,
+                "needs_reset": shown_count >= total_candidates and total_candidates >= 20,
+            }
+        )

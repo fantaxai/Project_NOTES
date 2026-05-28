@@ -136,7 +136,7 @@ export const useChecklistStore = defineStore('checklist', () => {
       if (currentChecklist.value?.id === checklistId) {
         currentChecklist.value = {
           ...currentChecklist.value,
-          saved_as_note: response.data.note_id
+          saved_as_note: response.data.note_id,
         }
         localStorage.setItem('currentChecklist', JSON.stringify(currentChecklist.value))
       }

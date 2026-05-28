@@ -3,8 +3,8 @@ import random
 from django.db import transaction
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from note.models import Note
 
@@ -36,11 +36,11 @@ class IdeaViewSet(viewsets.ReadOnlyModelViewSet):
 class CheckListViewSet(viewsets.ModelViewSet):
     serializer_class = CheckListSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         """Фильтруем чек-листы по текущему пользователю"""
         return CheckList.objects.filter(user=self.request.user).order_by("-creation_date")
-    
+
     def perform_create(self, serializer):
         """Автоматически добавляем пользователя при создании"""
         serializer.save(user=self.request.user)
@@ -61,10 +61,9 @@ class CheckListViewSet(viewsets.ModelViewSet):
 
         if ideas.count() == 0:
             return Response(
-                {"error": "Нет идей в выбранных категориях"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Нет идей в выбранных категориях"}, status=status.HTTP_400_BAD_REQUEST
             )
-            
+
         actual_amount = min(amount, ideas.count())
         selected_ideas = random.sample(list(ideas), actual_amount)
 
@@ -73,9 +72,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
 
         with transaction.atomic():
             checklist = CheckList.objects.create(
-                amount_of_ideas=actual_amount, 
-                categories=categories,
-                user=request.user
+                amount_of_ideas=actual_amount, categories=categories, user=request.user
             )
             items = []
             for order, idea in enumerate(selected_ideas):
@@ -104,7 +101,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
                 balanced_ideas.extend(random.sample(category_ideas, count))
             else:
                 balanced_ideas.extend(category_ideas)
-                
+
         if len(balanced_ideas) < total_amount:
             remaining = total_amount - len(balanced_ideas)
             all_other_ideas = [i for i in ideas if i not in balanced_ideas]
@@ -112,7 +109,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
                 balanced_ideas.extend(
                     random.sample(all_other_ideas, min(remaining, len(all_other_ideas)))
                 )
-                
+
         random.shuffle(balanced_ideas)
         return balanced_ideas
 
@@ -123,15 +120,11 @@ class CheckListViewSet(viewsets.ModelViewSet):
 
         # Проверяем принадлежность пользователю
         if checklist.user != request.user:
-            return Response(
-                {"error": "Доступ запрещен"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"error": "Доступ запрещен"}, status=status.HTTP_403_FORBIDDEN)
 
         if checklist.saved_as_note:
             return Response(
-                {"error": "Чек-лист уже сохранён как заметку"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Чек-лист уже сохранён как заметку"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         content_lines = []
@@ -143,7 +136,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
         note = Note.objects.create(
             title=f"Чек-лист от {checklist.creation_date.strftime('%d.%m.%Y')}",
             content="\n".join(content_lines),
-            user=request.user
+            user=request.user,
         )
         checklist.saved_as_note = note
         checklist.save()
@@ -154,19 +147,16 @@ class CheckListViewSet(viewsets.ModelViewSet):
     def regenerate(self, request, pk=None):
         """Перегенерировать чек-лист"""
         checklist = self.get_object()
-        
+
         # Проверяем принадлежность пользователю
         if checklist.user != request.user:
-            return Response(
-                {"error": "Доступ запрещен"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
+            return Response({"error": "Доступ запрещен"}, status=status.HTTP_403_FORBIDDEN)
+
         checklist.items.all().delete()
 
         amount = checklist.amount_of_ideas
         categories = checklist.categories
-        
+
         if categories:
             ideas = Idea.objects.filter(category__in=categories)
         else:
@@ -174,8 +164,7 @@ class CheckListViewSet(viewsets.ModelViewSet):
 
         if ideas.count() == 0:
             return Response(
-                {"error": "Нет идей в выбранных категориях"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Нет идей в выбранных категориях"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         actual_amount = min(amount, ideas.count())
@@ -195,21 +184,15 @@ class CheckListViewSet(viewsets.ModelViewSet):
     def toggle_completed(self, request, pk=None):
         """Отметить/снять отметку выполнения пункта"""
         checklist = self.get_object()
-        
+
         # Проверяем принадлежность пользователю
         if checklist.user != request.user:
-            return Response(
-                {"error": "Доступ запрещен"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"error": "Доступ запрещен"}, status=status.HTTP_403_FORBIDDEN)
 
         item_id = request.data.get("item_id")
         if not item_id:
-            return Response(
-                {"error": "item_id обязателен"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
+            return Response({"error": "item_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             item = CheckListItem.objects.get(id=item_id, checklist=checklist)
             item.completed = not item.completed
@@ -217,7 +200,4 @@ class CheckListViewSet(viewsets.ModelViewSet):
             serializer = CheckListItemSerializer(item)
             return Response(serializer.data)
         except CheckListItem.DoesNotExist:
-            return Response(
-                {"error": "Пункт не найден"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "Пункт не найден"}, status=status.HTTP_404_NOT_FOUND)

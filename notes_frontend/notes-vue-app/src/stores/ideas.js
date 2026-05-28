@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api from '../api/index'  // Импортируем общий api
+import api from '../api/index' // Импортируем общий api
 
 export const useIdeaStore = defineStore('idea', () => {
   const currentIdea = ref(null)
@@ -18,9 +18,9 @@ export const useIdeaStore = defineStore('idea', () => {
     try {
       const response = await api.get('/ideas/today/')
       console.log('✅ Ответ API:', response.data)
-      
+
       totalCandidates.value = response.data.total_candidates || 0
-      
+
       if (response.data.shown_ids) {
         shownNoteIds.value = new Set(response.data.shown_ids)
       }

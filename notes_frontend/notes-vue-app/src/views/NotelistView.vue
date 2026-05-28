@@ -384,7 +384,12 @@
 
           <div class="modal-actions">
             <button type="button" class="cancel-btn" @click="closeEditTagModal">Отмена</button>
-            <button type="button" :disabled="!editTagName.trim() || savingTag" class="save-btn" @click="saveTag">
+            <button
+              type="button"
+              :disabled="!editTagName.trim() || savingTag"
+              class="save-btn"
+              @click="saveTag"
+            >
               {{ savingTag ? 'Сохранение...' : editingTag ? 'Сохранить' : 'Создать' }}
             </button>
           </div>
@@ -748,12 +753,12 @@ const truncateTitle = (title) => {
 // Обрезка содержания: первые 3 строки, в каждой строке до 30 символов
 const truncateContent = (content) => {
   if (!content) return 'Нет содержания'
-  
+
   let text = content.replace(/<[^>]*>/g, '')
-  
+
   const lines = text.split('\n')
-  
-  const truncatedLines = lines.slice(0, 3).map(line => {
+
+  const truncatedLines = lines.slice(0, 3).map((line) => {
     if (line.length > 30) {
       return line.substring(0, 30) + '...'
     }
@@ -894,7 +899,7 @@ const saveTag = async () => {
     }
 
     await tagStore.fetchTags()
-    await noteListStore.fetchNotes()  
+    await noteListStore.fetchNotes()
     closeEditTagModal()
   } catch (err) {
     editTagError.value = err.response?.data?.detail || 'Ошибка сохранения тега'
@@ -1000,14 +1005,14 @@ onBeforeUnmount(() => {
   gap: 16px;
   margin: 16px 24px;
   align-items: flex-start;
-} 
+}
 
 @media (max-width: 768px) {
   .top-section {
     flex-direction: column;
     margin: 16px;
   }
-  
+
   .right-column {
     min-width: auto;
   }
@@ -1050,7 +1055,6 @@ onBeforeUnmount(() => {
     padding: 10px 12px;
   }
 }
-
 
 .tags-section-header {
   display: flex;
@@ -1298,26 +1302,26 @@ onBeforeUnmount(() => {
     margin: 12px 16px;
     gap: 12px;
   }
-  
+
   .left-column {
     gap: 10px;
   }
-  
+
   .right-column {
     min-width: auto;
     align-self: stretch;
   }
-  
+
   .controls-panel {
     flex-direction: column;
     margin: 4px auto 16px auto;
     padding: 0 20px;
   }
-  
+
   .notes-container {
     padding: 0 20px 20px 20px;
   }
-  
+
   .search-wrapper {
     max-width: 100%;
   }
@@ -1772,7 +1776,6 @@ onBeforeUnmount(() => {
   }
 }
 
-
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -2109,56 +2112,56 @@ onBeforeUnmount(() => {
     margin: 8px 12px;
     gap: 10px;
   }
-  
+
   .left-column {
     gap: 8px;
   }
-  
+
   .right-column {
     min-width: auto;
     align-self: stretch;
   }
-  
+
   .checklist-preview {
     padding: 12px;
     max-height: 280px;
   }
-  
+
   .controls-panel {
     flex-direction: column;
     margin: 4px auto 12px auto;
     padding: 0 12px;
     gap: 12px;
   }
-  
+
   .search-wrapper {
     max-width: 100%;
   }
-  
+
   .notes-container {
     padding: 0 12px 16px 12px;
   }
-  
+
   .notes-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .all-tags-grid {
     grid-template-columns: 1fr;
   }
-  
+
   /* Уменьшаем отступы в блоке тегов */
   .tags-section-inline {
     padding: 10px 12px;
   }
-  
+
   .popular-tag,
   .selected-tag {
     padding: 4px 10px;
     font-size: 12px;
   }
-  
+
   .tag-selector-inline {
     margin-top: 8px;
     padding-top: 8px;

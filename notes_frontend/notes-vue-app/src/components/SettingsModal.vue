@@ -10,7 +10,7 @@
         <!-- Секция аккаунта -->
         <div class="setting-group">
           <h4>Аккаунт</h4>
-          
+
           <!-- Авторизованный пользователь -->
           <div v-if="authStore.isAuthenticated" class="user-profile">
             <div class="user-avatar">
@@ -20,7 +20,7 @@
               <span class="user-name">{{ authStore.user?.username }}</span>
               <span class="user-email">{{ authStore.user?.email }}</span>
             </div>
-            <button class="logout-btn" @click="handleLogout" :disabled="loggingOut">
+            <button class="logout-btn" :disabled="loggingOut" @click="handleLogout">
               {{ loggingOut ? 'Выход...' : 'Выйти' }}
             </button>
           </div>
@@ -30,108 +30,102 @@
             <p class="auth-hint">
               Войдите или создайте аккаунт для синхронизации ваших идей между устройствами
             </p>
-            
+
             <!-- Табы -->
             <div class="auth-tabs">
-              <button 
-                :class="{ active: activeTab === 'login' }"
-                @click="switchTab('login')"
-              >
+              <button :class="{ active: activeTab === 'login' }" @click="switchTab('login')">
                 Вход
               </button>
-              <button 
-                :class="{ active: activeTab === 'register' }"
-                @click="switchTab('register')"
-              >
+              <button :class="{ active: activeTab === 'register' }" @click="switchTab('register')">
                 Регистрация
               </button>
             </div>
 
             <!-- Форма входа -->
-            <form v-if="activeTab === 'login'" @submit.prevent="handleLogin" class="auth-form">
+            <form v-if="activeTab === 'login'" class="auth-form" @submit.prevent="handleLogin">
               <div class="form-group">
                 <label for="login-email">Email</label>
-                <input 
+                <input
                   id="login-email"
-                  v-model="loginForm.email" 
-                  type="email" 
-                  required 
+                  v-model="loginForm.email"
+                  type="email"
+                  required
                   placeholder="your@email.com"
                   autocomplete="email"
                 />
               </div>
-              
+
               <div class="form-group">
                 <label for="login-password">Пароль</label>
-                <input 
+                <input
                   id="login-password"
-                  v-model="loginForm.password" 
-                  type="password" 
-                  required 
+                  v-model="loginForm.password"
+                  type="password"
+                  required
                   placeholder="Введите пароль"
                   autocomplete="current-password"
                 />
               </div>
-              
+
               <div v-if="error" class="error-message">{{ error }}</div>
-              
+
               <button type="submit" class="auth-submit-btn" :disabled="loading">
                 {{ loading ? 'Вход...' : 'Войти' }}
               </button>
             </form>
 
             <!-- Форма регистрации -->
-            <form v-else @submit.prevent="handleRegister" class="auth-form">
+            <form v-else class="auth-form" @submit.prevent="handleRegister">
               <div class="form-group">
                 <label for="reg-username">Имя пользователя</label>
-                <input 
+                <input
                   id="reg-username"
-                  v-model="registerForm.username" 
-                  type="text" 
-                  required 
+                  v-model="registerForm.username"
+                  type="text"
+                  required
                   placeholder="Придумайте имя"
                   autocomplete="username"
                 />
               </div>
-              
+
               <div class="form-group">
                 <label for="reg-email">Email</label>
-                <input 
+                <input
                   id="reg-email"
-                  v-model="registerForm.email" 
-                  type="email" 
-                  required 
+                  v-model="registerForm.email"
+                  type="email"
+                  required
                   placeholder="your@email.com"
                   autocomplete="email"
                 />
               </div>
-              
+
               <div class="form-group">
                 <label for="reg-password">Пароль</label>
-                <input 
+                <input
                   id="reg-password"
-                  v-model="registerForm.password" 
-                  type="password" 
-                  required 
+                  v-model="registerForm.password"
+                  type="password"
+                  required
                   placeholder="Минимум 8 символов"
                   autocomplete="new-password"
                 />
               </div>
-              
+
               <div class="form-group">
                 <label for="reg-password2">Подтвердите пароль</label>
-                <input 
+                <input
                   id="reg-password2"
-                  v-model="registerForm.password2" 
-                  type="password" 
-                  required 
+                  v-model="registerForm.password2"
+                  type="password"
+                  required
                   placeholder="Повторите пароль"
                   autocomplete="new-password"
                 />
               </div>
-              
+
               <div v-if="error" class="error-message">{{ error }}</div>
-              
+
               <button type="submit" class="auth-submit-btn" :disabled="loading">
                 {{ loading ? 'Регистрация...' : 'Зарегистрироваться' }}
               </button>
@@ -197,7 +191,7 @@ const error = ref('')
 // Форма входа
 const loginForm = reactive({
   email: '',
-  password: ''
+  password: '',
 })
 
 // Форма регистрации
@@ -205,7 +199,7 @@ const registerForm = reactive({
   username: '',
   email: '',
   password: '',
-  password2: ''
+  password2: '',
 })
 
 function switchTab(tab) {
@@ -224,7 +218,7 @@ function close() {
 async function handleLogin() {
   error.value = ''
   loading.value = true
-  
+
   try {
     const result = await authStore.login(loginForm.email, loginForm.password)
     if (result.success) {
@@ -244,20 +238,20 @@ async function handleLogin() {
 
 async function handleRegister() {
   error.value = ''
-  
+
   // Валидация
   if (registerForm.password !== registerForm.password2) {
     error.value = 'Пароли не совпадают'
     return
   }
-  
+
   if (registerForm.password.length < 8) {
     error.value = 'Пароль должен быть не менее 8 символов'
     return
   }
-  
+
   loading.value = true
-  
+
   try {
     const result = await authStore.register(
       registerForm.username,
@@ -265,7 +259,7 @@ async function handleRegister() {
       registerForm.password,
       registerForm.password2
     )
-    
+
     if (result.success) {
       registerForm.username = ''
       registerForm.email = ''
@@ -276,7 +270,7 @@ async function handleRegister() {
       // Обработка разных форматов ошибок от сервера
       if (typeof result.error === 'object') {
         const messages = []
-        for (const [key, value] of Object.entries(result.error)) {
+        for (const [value] of Object.entries(result.error)) {
           if (Array.isArray(value)) {
             messages.push(...value)
           } else {
@@ -298,7 +292,7 @@ async function handleRegister() {
 
 async function handleLogout() {
   loggingOut.value = true
-  
+
   try {
     await authStore.logout()
   } catch (err) {
@@ -631,11 +625,11 @@ async function handleLogout() {
     width: 95%;
     padding: 20px;
   }
-  
+
   .user-profile {
     flex-wrap: wrap;
   }
-  
+
   .logout-btn {
     width: 100%;
     margin-top: 8px;

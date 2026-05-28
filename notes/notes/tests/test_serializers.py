@@ -43,8 +43,8 @@ class TestTagSerializer:
 @pytest.mark.django_db
 class TestNoteSerializer:
 
-    def test_serialize_note(self, sample_tags):
-        note = Note.objects.create(title="Test", content="Content")
+    def test_serialize_note(self, sample_tags, user):
+        note = Note.objects.create(title="Test", content="Content", user=user)
         note.tags.set(sample_tags[:2])
 
         serializer = NoteSerializer(note)

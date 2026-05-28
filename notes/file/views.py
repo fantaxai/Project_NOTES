@@ -1,8 +1,8 @@
 from django.db.models import Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from note.models import Note
 
@@ -15,9 +15,7 @@ class FileViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Только файлы заметок текущего пользователя
-        return File.objects.filter(
-            note__user=self.request.user
-        ).order_by("-creation_date")
+        return File.objects.filter(note__user=self.request.user).order_by("-creation_date")
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -129,6 +127,7 @@ class FileViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["delete"])
     def clear_old_files(self, request):
         from datetime import timedelta
+
         from django.utils import timezone
 
         days = int(request.data.get("days", 30))

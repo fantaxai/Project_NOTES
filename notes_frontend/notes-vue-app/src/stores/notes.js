@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { notesApi } from '../api/index'  // Импортируем из index.ts
+import { notesApi } from '../api/index' // Импортируем из index.ts
 
 export const useNoteStore = defineStore('note', () => {
   const notes = ref([])
@@ -101,7 +101,7 @@ export const useNoteStore = defineStore('note', () => {
 
   const hasFiles = async (noteId) => {
     try {
-      const response = await notesApi.getById(noteId)
+      await notesApi.getById(noteId)
       return false
     } catch (err) {
       console.error('Ошибка проверки файлов:', err)

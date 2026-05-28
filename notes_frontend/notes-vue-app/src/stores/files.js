@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import api from '../api/index'  // ← импортируем общий инстанс с JWT
+import api from '../api/index' // ← импортируем общий инстанс с JWT
 
 const filesApi = {
   getAll: () => api.get('/files/'),
@@ -20,8 +20,7 @@ const filesApi = {
     })
   },
   delete: (id) => api.delete(`/files/${id}/`),
-  updateThumbnail: (id, thumbnail) =>
-    api.post(`/files/${id}/update_thumbnail/`, { thumbnail }),
+  updateThumbnail: (id, thumbnail) => api.post(`/files/${id}/update_thumbnail/`, { thumbnail }),
 }
 
 export const useFileStore = defineStore('file', () => {

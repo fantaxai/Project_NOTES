@@ -1,44 +1,52 @@
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from note.models import Note, Tag, IdeaOfTheDay
 
+User = get_user_model()
 
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     """Автоматически включает доступ к БД для всех тестов."""
     pass
 
+@pytest.fixture
+def user(db):
+    """Создаёт тестового пользователя"""
+    return User.objects.create_user(
+        username='testuser',
+        email='test@example.com',
+        password='testpass123'
+    )
 
 @pytest.fixture
-def api_client():
-    return APIClient()
-
+def api_client(user):
+    """Фикстура с аутентифицированным клиентом"""
+    client = APIClient()
+    client.force_authenticate(user=user)
+    return client
 
 @pytest.fixture
-def tag_factory():
+def tag_factory(user):
     """Фабрика для создания тегов"""
-
     def create_tag(name="Test Tag", color="#C9A9E8"):
-        return Tag.objects.create(name=name, color=color)
-
+        return Tag.objects.create(name=name, color=color, user=user)
     return create_tag
 
-
 @pytest.fixture
-def note_factory(tag_factory):
+def note_factory(tag_factory, user):
     """Фабрика для создания заметок"""
-
     def create_note(title="Test Note", content="Test Content", tags=None, is_idea_candidate=True):
         note = Note.objects.create(
-            title=title, content=content, is_idea_candidate=is_idea_candidate
+            title=title,
+            content=content,
+            is_idea_candidate=is_idea_candidate,
+            user=user  # Привязываем к пользователю
         )
         if tags:
             note.tags.set(tags)
         return note
-
     return create_note
-
 
 @pytest.fixture
 def sample_tags(tag_factory):
@@ -48,7 +56,6 @@ def sample_tags(tag_factory):
         tag_factory("Учеба", "#A0C4FF"),
         tag_factory("Работа", "#CAFFBF"),
     ]
-
 
 @pytest.fixture
 def sample_notes(note_factory, sample_tags):

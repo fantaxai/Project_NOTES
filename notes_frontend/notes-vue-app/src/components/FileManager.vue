@@ -196,8 +196,6 @@ const downloadFileDirectly = (file) => {
   document.body.removeChild(link)
 }
 
-
-
 // Экспортируем метод для родительского компонента
 defineExpose({
   triggerFileInput,
@@ -250,7 +248,6 @@ defineExpose({
         >
           ⬇️
         </button>
-
 
         <button
           class="file-delete-btn"
@@ -391,7 +388,6 @@ defineExpose({
   opacity: 1;
   background: #e8f4ff;
 }
-
 
 .file-delete-btn {
   background: none;

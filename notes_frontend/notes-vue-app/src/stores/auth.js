@@ -8,69 +8,69 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(localStorage.getItem('access_token'))
   const refreshToken = ref(localStorage.getItem('refresh_token'))
   const isAuthChecked = ref(false)
-  
+
   const isAuthenticated = computed(() => {
     return !!accessToken.value && !!user.value
   })
-  
- function setTokens(access, refresh) {
-  accessToken.value = access
-  refreshToken.value = refresh
-  localStorage.setItem('access_token', access)
-  if (refresh) {
-    localStorage.setItem('refresh_token', refresh)
-  }
-  // Больше ничего не нужно — интерцептор читает из localStorage сам
-}
 
-function clearTokens() {
-  accessToken.value = null
-  refreshToken.value = null
-  user.value = null
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  localStorage.removeItem('currentChecklist') // ← чистим чеклист при выходе
-}
-  
+  function setTokens(access, refresh) {
+    accessToken.value = access
+    refreshToken.value = refresh
+    localStorage.setItem('access_token', access)
+    if (refresh) {
+      localStorage.setItem('refresh_token', refresh)
+    }
+    // Больше ничего не нужно — интерцептор читает из localStorage сам
+  }
+
+  function clearTokens() {
+    accessToken.value = null
+    refreshToken.value = null
+    user.value = null
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('currentChecklist') // ← чистим чеклист при выходе
+  }
+
   async function register(username, email, password, password2) {
     try {
       console.log('Отправка запроса регистрации:', {
         username,
         email,
         password: '***',
-        password2: '***'
+        password2: '***',
       })
-      
+
       const response = await authAPI.register({
         username,
         email,
         password,
-        password2
+        password2,
       })
-      
+
       console.log('Ответ сервера при регистрации:', response.data)
-      
+
       const { access, refresh, user: userData } = response.data
-      
+
       if (access && refresh) {
         user.value = userData || null
         setTokens(access, refresh)
         return { success: true }
       } else {
-        return { 
-          success: false, 
-          error: 'Сервер не вернул токены авторизации' 
+        return {
+          success: false,
+          error: 'Сервер не вернул токены авторизации',
         }
       }
     } catch (error) {
       console.error('Ошибка при регистрации:', error)
       console.error('Детали ошибки:', error.response?.data)
-      
+
       // Проверяем, есть ли ответ от сервера
       if (error.response) {
         // Сервер ответил с ошибкой
         const errorData = error.response.data
-        
+
         // Обработка разных форматов ошибок Django REST
         if (typeof errorData === 'object') {
           // Формат: {"email": ["уже существует"], "password": ["слишком короткий"]}
@@ -84,30 +84,30 @@ function clearTokens() {
               messages.push(`${field}: ${JSON.stringify(errors)}`)
             }
           }
-          return { 
-            success: false, 
-            error: messages.join('; ') || 'Ошибка валидации'
+          return {
+            success: false,
+            error: messages.join('; ') || 'Ошибка валидации',
           }
         } else if (typeof errorData === 'string') {
           return { success: false, error: errorData }
         }
-        
+
         return { success: false, error: 'Ошибка сервера' }
       } else if (error.request) {
         // Запрос был отправлен, но ответа нет
-        return { 
-          success: false, 
-          error: 'Сервер недоступен. Проверьте подключение.' 
+        return {
+          success: false,
+          error: 'Сервер недоступен. Проверьте подключение.',
         }
       }
-      
-      return { 
-        success: false, 
-        error: 'Неизвестная ошибка при регистрации' 
+
+      return {
+        success: false,
+        error: 'Неизвестная ошибка при регистрации',
       }
     }
   }
-  
+
   // Остальные методы остаются без изменений...
   async function login(email, password) {
     try {
@@ -117,13 +117,13 @@ function clearTokens() {
       setTokens(access, refresh)
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Ошибка входа' 
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Ошибка входа',
       }
     }
   }
-  
+
   async function logout() {
     try {
       if (refreshToken.value) {
@@ -135,7 +135,7 @@ function clearTokens() {
       clearTokens()
     }
   }
-  
+
   async function checkAuth() {
     if (accessToken.value) {
       try {
@@ -148,7 +148,7 @@ function clearTokens() {
     }
     isAuthChecked.value = true
   }
-  
+
   return {
     user,
     accessToken,
@@ -158,6 +158,6 @@ function clearTokens() {
     register,
     login,
     logout,
-    checkAuth
+    checkAuth,
   }
 })

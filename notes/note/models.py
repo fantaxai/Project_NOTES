@@ -1,5 +1,5 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
 class Tag(models.Model):
@@ -10,10 +10,10 @@ class Tag(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='tag',
+        related_name="tag",
         verbose_name="Пользователь",
         null=True,
-        blank=True
+        blank=True,
     )
 
     def __str__(self):
@@ -34,16 +34,16 @@ class Note(models.Model):
     times_shown_as_idea = models.PositiveIntegerField(
         default=0, verbose_name="Количество показов как идея дня"
     )
-    
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='notes',
+        related_name="notes",
         verbose_name="Пользователь",
         null=True,
-        blank=True
+        blank=True,
     )
-    
+
     def __str__(self):
         return self.title
 
@@ -52,14 +52,14 @@ class IdeaOfTheDay(models.Model):
     note = models.ForeignKey("note.Note", on_delete=models.CASCADE, verbose_name="Заметка")
     date = models.DateField(auto_now_add=True, verbose_name="Дата показа")
     shown = models.BooleanField(default=True, verbose_name="Показана пользователю")
-    
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='ideas_of_day',
+        related_name="ideas_of_day",
         verbose_name="Пользователь",
         null=True,
-        blank=True
+        blank=True,
     )
 
     class Meta:

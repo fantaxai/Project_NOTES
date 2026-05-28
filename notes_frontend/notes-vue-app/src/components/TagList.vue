@@ -129,8 +129,12 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error,
@@ -384,5 +388,4 @@ defineEmits(['select', 'edit', 'delete', 'create', 'retry'])
     font-size: 11px;
   }
 }
-
 </style>
