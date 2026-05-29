@@ -7,6 +7,7 @@ from .models import File
 
 class FileSerializer(serializers.ModelSerializer):
     note_title = serializers.ReadOnlyField(source="note.title")
+    file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = File
@@ -19,21 +20,30 @@ class FileSerializer(serializers.ModelSerializer):
             "note",
             "note_title",
             "creation_date",
+            "file_url",
         ]
         read_only_fields = ["id", "creation_date"]
+
+    def get_file_url(self, obj):
+        if not obj.file:
+            return None
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(obj.file.url)
+        return obj.file.url
 
 
 class FileCreateSerializer(serializers.ModelSerializer):
     note = serializers.PrimaryKeyRelatedField(queryset=Note.objects.all())
     thumbnail = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    file = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = File
-        fields = ["id", "name", "thumbnail", "format", "size", "note", "creation_date"]
+        fields = ["id", "name", "thumbnail", "format", "size", "note", "creation_date", "file"]
         read_only_fields = ["id", "creation_date"]
 
     def validate_size(self, value):
-        # Преобразуем в int если пришло как строка
         value = int(value) if isinstance(value, str) else value
         max_size = 10 * 1024 * 1024
         if value > max_size:
@@ -51,5 +61,4 @@ class FileCreateSerializer(serializers.ModelSerializer):
         return value.lower()
 
     def validate(self, data):
-        print("Валидация данных:", data)  # Для отладки
         return data
