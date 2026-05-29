@@ -7,7 +7,12 @@ const props = defineProps({
     type: [Number, String],
     required: true,
   },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 })
+
 
 const emit = defineEmits(['file-uploaded', 'file-deleted'])
 
@@ -72,6 +77,7 @@ const uploadFiles = async (selectedFiles) => {
         size: file.size,
         format: format,
         note: props.noteId,
+        file: file, 
         thumbnail: thumbnail,
       }
 
@@ -250,6 +256,7 @@ defineExpose({
         </button>
 
         <button
+          v-if="!props.readonly"
           class="file-delete-btn"
           title="Удалить файл"
           @click.stop="handleDeleteFile(file.id)"

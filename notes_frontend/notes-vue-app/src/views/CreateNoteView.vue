@@ -377,6 +377,7 @@ const uploadFilesForNote = async (noteId) => {
         size: fileData.size,
         format: fileData.format,
         note: noteId,
+        file: fileData.file,   
         thumbnail: thumbnail,
       })
 

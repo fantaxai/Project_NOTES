@@ -7,18 +7,24 @@ const filesApi = {
   getById: (id) => api.get(`/files/${id}/`),
   getByNote: (noteId) => api.get(`/files/by_note/?note_id=${noteId}`),
   create: (fileData) => {
-    const formData = new FormData()
-    formData.append('name', fileData.name)
-    formData.append('size', fileData.size)
-    formData.append('format', fileData.format)
-    formData.append('note', fileData.note)
-    if (fileData.thumbnail) {
-      formData.append('thumbnail', fileData.thumbnail)
-    }
-    return api.post('/files/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  },
+  const formData = new FormData()
+  formData.append('name', fileData.name)
+  formData.append('size', fileData.size)
+  formData.append('format', fileData.format)
+  formData.append('note', fileData.note)
+  if (fileData.file) {
+    formData.append('file', fileData.file)
+  }
+
+  if (fileData.thumbnail) {
+    formData.append('thumbnail', fileData.thumbnail)
+  }
+
+  return api.post('/files/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+},
+
   delete: (id) => api.delete(`/files/${id}/`),
   updateThumbnail: (id, thumbnail) => api.post(`/files/${id}/update_thumbnail/`, { thumbnail }),
 }

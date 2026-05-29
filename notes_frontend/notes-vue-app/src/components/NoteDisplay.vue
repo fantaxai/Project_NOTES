@@ -402,10 +402,27 @@ const escapeHtml = (text) => {
         </div>
       </div>
 
-      <div v-if="!isEditing" class="files-section">
-        <div class="files-header"><h3 class="files-title">Прикреплённые файлы</h3></div>
-        <FileManager ref="fileManagerRef" :note-id="note.id" />
-      </div>
+      <div class="files-section">
+  <div class="files-header">
+    <h3 class="files-title">📎 Прикреплённые файлы</h3>
+    <!-- Кнопка появляется ТОЛЬКО в режиме редактирования -->
+    <button
+      v-if="isEditing"
+      class="add-file-inline-btn"
+      type="button"
+      @click="triggerFileUpload"
+    >
+      + Добавить файл
+    </button>
+  </div>
+  <!-- FileManager теперь всегда виден, но удаление доступно только при редактировании -->
+  <FileManager
+    ref="fileManagerRef"
+    :note-id="note.id"
+    :readonly="!isEditing"
+  />
+</div>
+
 
       <div class="note-footer">
         <span v-if="note.creation_date" class="date">Создано: {{ formatDate(note.creation_date) }}</span>
@@ -541,7 +558,29 @@ const escapeHtml = (text) => {
 .save-edit-btn { background: var(--primary-color, #c9a9e8); color: white; }
 .save-edit-btn:hover { background: var(--primary-hover, #b794d4); }
 .files-section { padding: 20px 24px 24px; border-top: 1px solid var(--border-color, #e0e0e0); }
-.files-header { margin-bottom: 16px; }
+.add-file-inline-btn {
+  padding: 5px 14px;
+  background: var(--primary-light, #f0e6ff);
+  color: var(--primary-color, #c9a9e8);
+  border: 1.5px solid var(--primary-color, #c9a9e8);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-file-inline-btn:hover {
+  background: var(--primary-color, #c9a9e8);
+  color: white;
+}
+
+.files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
 .files-title { margin: 0; font-size: 16px; font-weight: 500; color: var(--text-primary, #333); }
 .note-footer { padding: 16px 24px; border-top: 1px solid var(--border-color, #e0e0e0); background: var(--bg-tertiary, #fafafa); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .date { font-size: 12px; color: var(--text-tertiary, #999); }
