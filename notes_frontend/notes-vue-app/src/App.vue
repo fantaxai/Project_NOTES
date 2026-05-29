@@ -37,9 +37,7 @@ onMounted(async () => {
 
   // Запустить тур автоматически при первом входе
   if (!localStorage.getItem('tour_completed') && authStore.isAuthenticated) {
-    setTimeout(() => {
-      showTour.value = true
-    }, 800)
+    setTimeout(() => { showTour.value = true }, 800)
   }
 })
 </script>
@@ -92,24 +90,14 @@ onMounted(async () => {
   --modal-overlay: rgba(0, 0, 0, 0.7);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg-secondary);
   color: var(--text-primary);
-  transition:
-    background-color 0.3s,
-    color 0.3s;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-#app {
-  min-height: 100vh;
-  background: var(--bg-secondary);
-}
+#app { min-height: 100vh; background: var(--bg-secondary); }
 </style>
