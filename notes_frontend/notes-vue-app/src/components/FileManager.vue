@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useFileStore } from '../stores/files'
+import { useAuthStore } from '../stores/auth'
 
 const props = defineProps({
   noteId: {
@@ -17,6 +18,7 @@ const props = defineProps({
 const emit = defineEmits(['file-uploaded', 'file-deleted'])
 
 const fileStore = useFileStore()
+const authStore = useAuthStore()
 const fileInput = ref(null)
 const uploading = ref(false)
 
@@ -163,44 +165,56 @@ const getFileIcon = (format) => {
   return icons[format] || '📎'
 }
 
-// Заменяет старую downloadFile
-const openFile = (file) => {
+// Получаем JWT токен из Pinia store
+const getAuthToken = () => authStore.accessToken || localStorage.getItem('access_token')
+
+// Скачивает файл через fetch с JWT — без редиректа на пустую страницу
+const downloadWithAuth = async (file, forceDownload = false) => {
   if (!file.file_url) {
-    alert('Ссылка на файл недоступна')
+    alert('Файл ещё не сохранён на сервере')
     return
   }
 
-  const imageFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp']
-  if (imageFormats.includes(file.format?.toLowerCase())) {
-    // Открываем картинку в новой вкладке
-    window.open(file.file_url, '_blank')
-    return
-  }
+  const token = getAuthToken()
+  const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
-  if (file.format?.toLowerCase() === 'pdf') {
-    // PDF открываем в новой вкладке для просмотра
-    window.open(file.file_url, '_blank')
-    return
-  }
+  try {
+    const response = await fetch(file.file_url, { headers })
 
-  // Остальные файлы — скачиваем
-  const link = document.createElement('a')
-  link.href = file.file_url
-  link.download = file.name
-  link.target = '_blank'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = blobUrl
+
+    // PDF и картинки — открыть в новой вкладке; остальное — скачать
+    const viewInBrowser = !forceDownload &&
+      ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.format?.toLowerCase())
+
+    if (viewInBrowser) {
+      link.target = '_blank'
+      link.rel = 'noopener'
+    } else {
+      link.download = file.name
+    }
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // Освобождаем blob через секунду
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
+  } catch (err) {
+    console.error('Ошибка скачивания:', err)
+    alert('Не удалось скачать файл. Попробуйте ещё раз.')
+  }
 }
-const downloadFileDirectly = (file) => {
-  if (!file.file_url) return
-  const link = document.createElement('a')
-  link.href = file.file_url
-  link.download = file.name
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-}
+
+const openFile = (file) => downloadWithAuth(file, false)
+const downloadFileDirectly = (file) => downloadWithAuth(file, true)
 
 // Экспортируем метод для родительского компонента
 defineExpose({
